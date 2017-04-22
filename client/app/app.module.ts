@@ -9,11 +9,21 @@ import {AppRoutingModule} from './app-routing/app-routing.module';
 import {MaterialModule} from './material/material.module';
 
 import 'hammerjs';
+import { AlertComponent } from './alert/alert.component';
+import {AlertService} from './alert.service';
+import { HomeComponent } from './home/home.component';
+import { LoginComponent } from './login/login.component';
+import {AuthGuard} from "./auth.guard";
+import {AuthenticationService} from "./authentication.service";
+import {UserService} from "./user.service";
 
 @NgModule({
     declarations: [
         AppComponent,
-        RegistrationComponent
+        RegistrationComponent,
+        AlertComponent,
+        HomeComponent,
+        LoginComponent
     ],
     imports: [
         BrowserModule,
@@ -22,7 +32,7 @@ import 'hammerjs';
         AppRoutingModule,
         MaterialModule
     ],
-    providers: [],
+    providers: [AlertService, AuthGuard, AuthenticationService, UserService],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

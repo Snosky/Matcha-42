@@ -28,6 +28,8 @@ class User
     /* Method */
     hydrate(data)
     {
+        if (!data)
+            return false;
         this.id = data.usr_id;
         this.username = data.usr_username;
         this.email = data.usr_email;
@@ -50,7 +52,6 @@ class User
         db.query('SELECT * FROM t_user', (err, result) => {
             if (err)
                 return callback(err);
-
             Promise.map(result, (user, id) => {
                 return result[id] = new User().hydrate(user);
             }).then(() => {
@@ -70,7 +71,17 @@ class User
         });
     }
 
-    static delete(user_id, callback)
+    static findByUsername(username, callback)
+    {
+        db.query('SELECT * FROM t_user WHERE usr_username=?', username, (err, result) => {
+            if (err)
+                return callback(err);
+            callback(null, new User().hydrate(result[0]));
+        });
+    }
+
+    /* TODO : Peut etre pas en static */
+    static remove(user_id, callback)
     {
         db.query('DELETE FROM t_user WHERE usr_id=?', user_id, (err, result) => {
             if (err)
@@ -123,5 +134,11 @@ function generateToken()
 {
 
 }
+
+/* To Json */
+User.prototype.toJSON = function(){
+    let {id, username, email, password, activated, token} = this;
+    return {id, username, email, password, activated, token};
+};
 
 module.exports = User;

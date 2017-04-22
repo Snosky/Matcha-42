@@ -1,10 +1,16 @@
 const express = require('express');
 const router = express.Router();
 
-const User = require('../models/user');
+const user = require('./users');
+
+router.post('/authenticate', user.authenticate);
+
+module.exports = router;
+
+//const User = require('../models/user');
 
 /* User exemple */
-router.route('/users')
+/*router.route('/users')
     .post((req, res) => {
         let user = new User();
         user.username = req.body.username;
@@ -54,4 +60,4 @@ router.route('/users/:user_id')
             res.json({ message: 'User deleted' });
         })
     });
-module.exports = router;
+module.exports = router;*/
