@@ -21,26 +21,12 @@ export class LoginComponent implements OnInit {
         private router: Router,
         private authenticationService: AuthenticationService,
         private alertService: AlertService,
-
         private userService: UserService
     ) { }
 
     ngOnInit() {
         this.authenticationService.logout();
         this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        this.userService.getAll().subscribe(users => { this.users = users; });
-    }
-
-    login() {
-        this.loading = true;
-        this.authenticationService.login(this.model.username, this.model.password)
-            .subscribe(data => {
-                this.router.navigate([this.returnUrl]);
-            },
-            error => {
-                this.alertService.error(error._body);
-                this.loading = false;
-            });
     }
 
 }

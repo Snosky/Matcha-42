@@ -1,61 +1,65 @@
-<!--<div class="row">
-    <div class="col-lg-4 col-lg-offset-4 col-sm-10 col-sm-offset-1">
-        <form>
-            <div class="row">
-                <div class="col-sm-12">
-                    I am
-                    <md-select placeholder="a robot">
-                        <md-option>a woman</md-option>
-                        <md-option>a man</md-option>
-                    </md-select>
-                    seeking
-                    <md-select placeholder="a robot">
-                        <md-option>a woman</md-option>
-                        <md-option>a man</md-option>
-                        <md-option>anyone !</md-option>
-                    </md-select>
-                </div>
+<div class="col-md-4 col-md-offset-4 registration">
+    <h2>Register to Matcha !</h2>
+    <form #form="ngForm">
+        <!--<div class="row">
+            <div class="col-md-12 text-center">
+                I am
+                <md-select placeholder="a robot" floatPlaceholder="never" required name="sex" [(ngModel)]="model.sex" #sex="ngModel">
+                    <md-option [value]="woman">a woman</md-option>
+                    <md-option [value]="man">a man</md-option>
+                </md-select>
+                seeking
+                <md-select placeholder="a robot" floatPlaceholder="never" required name="orientation" [(ngModel)]="model.orientation" #orientation="ngModel">
+                    <md-option [value]="woman">a woman</md-option>
+                    <md-option [value]="man">a man</md-option>
+                </md-select>
             </div>
-
-            <div class="row">
-                <div class="col-sm-12">
-                    <md-input-container>
-                        <input mdInput type="date" placeholder="First name">
-                    </md-input-container>
-                </div>
+        </div>
+        <!--<div class="row">
+            <div class="col-md-6">
+                <md-input-container>
+                    <input type="text" mdInput id="firstname" placeholder="Firstname" [(ngModel)]="model.firstname" required name="firstname" #firstname="ngModel">
+                    <md-error>Firstname is required.</md-error>
+                </md-input-container>
             </div>
-
-        </form>
-
-    </div>
-</div> -->
-<div class="col-md-6 col-md-offset-3">
-    <h2>Register</h2>
-    <form name="form" (ngSubmit)="f.form.valid && register()" #f="ngForm" novalidate>
-        <div class="form-group" [ngClass]="{ 'has-error': f.submitted && !username.valid }">
-            <label for="firstName">First Name</label>
-            <input type="text" class="form-control" name="firstName" id="firstName" [(ngModel)]="model.firstName" #firstName="ngModel" required />
-            <div *ngIf="f.submitted && !firstName.valid" class="help-block">First Name is required</div>
+            <div class="col-md-6">
+                <md-input-container>
+                    <input type="text" mdInput id="lastname" placeholder="Lastname" [(ngModel)]="model.lastname" required name="lastname" #lastname="ngModel">
+                    <md-error>Lastname is required.</md-error>
+                </md-input-container>
+            </div>
+        </div>-->
+        <div class="row">
+            <div class="col-md-12">
+                <md-input-container>
+                    <input mdInput type="email" id="name" placeholder="Email adress" [(ngModel)]="model.email" required name="email" pattern="^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$" #email="ngModel">
+                    <md-error>Email adress is required.</md-error>
+                </md-input-container>
+            </div>
         </div>
-        <div class="form-group" [ngClass]="{ 'has-error': f.submitted && !username.valid }">
-            <label for="lastName">Last Name</label>
-            <input type="text" class="form-control" name="lastName" id="lastName" [(ngModel)]="model.lastName" #lastName="ngModel" required />
-            <div *ngIf="f.submitted && !lastName.valid" class="help-block">Last Name is required</div>
+        <div class="row">
+            <div class="col-md-12">
+                <md-input-container>
+                    <input type="password" mdInput type="password" placeholder="Password" [(ngModel)]="model.password" required name="passowrd" #password="ngModel">
+                    <md-error>Password is required.</md-error>
+                </md-input-container>
+            </div>
         </div>
-        <div class="form-group" [ngClass]="{ 'has-error': f.submitted && !username.valid }">
-            <label for="username">Username</label>
-            <input type="text" class="form-control" name="username" id="username" [(ngModel)]="model.username" #username="ngModel" required />
-            <div *ngIf="f.submitted && !username.valid" class="help-block">Username is required</div>
+        <div class="row">
+            <div class="col-md-12">
+                <md-input-container>
+                    <input type="passwordConf" mdInput type="password" placeholder="Password Confirmation" [(ngModel)]="model.passwordConf" required name="passowrdConf" appValidateEqual="password" #passwordConf="ngModel">
+                    <md-error>Password confirmation is required.</md-error>
+                </md-input-container>
+            </div>
         </div>
-        <div class="form-group" [ngClass]="{ 'has-error': f.submitted && !password.valid }">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" name="password" id="password" [(ngModel)]="model.password" #password="ngModel" required />
-            <div *ngIf="f.submitted && !password.valid" class="help-block">Password is required</div>
-        </div>
-        <div class="form-group">
-            <button [disabled]="loading" class="btn btn-primary">Register</button>
-            <img *ngIf="loading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
-            <a [routerLink]="['/login']" class="btn btn-link">Cancel</a>
+        <div class="row">
+            <div class="col-md-12">
+                <button type="submit" md-raised-button [disabled]="!form.valid">
+                    <md-icon>keyboard_arrow_right</md-icon>
+                    Register !
+                </button>
+            </div>
         </div>
     </form>
 </div>

@@ -1,30 +1,26 @@
 import { Injectable } from '@angular/core';
-import {Headers, Http, RequestOptions, Response} from '@angular/http';
-import {User} from "./models/user";
+import {Headers, Http } from '@angular/http';
+import { User } from './models/user';
+
+import 'rxjs/add/operator/toPromise';
 
 @Injectable()
 export class UserService {
 
-    private jwt() {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser && currentUser.token) {
-            const headers = new Headers({ 'Authorization': 'Bearer ' + currentUser.token });
-            return new RequestOptions({ headers: headers });
-        }
-    }
+    private headers = new Headers({ 'Content-Type': 'application/json' });
 
     constructor(private http: Http) { }
 
-    getAll() {
-        return this.http.get('/api/v1/users', this.jwt()).map((response: Response) => response.json());
+    create(user: User): Promise<User> {
+        return this.http
+            .post('/api/user', JSON.stringify(user), {headers: this.headers})
+            .toPromise()
+            .then(res => res.json().data as User)
+            .catch(this.handleError);
     }
 
-    getById(_id: string) {
-        return this.http.get('/api/v1/users/' + _id, this.jwt()).map((response: Response) => response.json());
+    private handleError(error: any): Promise<any> {
+        console.error('An error occured', error);
+        return Promise.reject(error.message || error);
     }
-
-    create(user: User) {
-        return this.http.post('/api/v1/users/register', user, this.jwt());
-    }
-
 }

@@ -3,6 +3,8 @@ const credential = require('credential');
 const db = require('../config/db');
 const Promise = require('bluebird');
 
+/* TODO : Use bcrypt instead of credential */
+
 const pw = credential();
 
 class User
@@ -87,6 +89,15 @@ class User
             if (err)
                 return callback(err);
             callback(null, result.affectedRows);
+        })
+    }
+
+    static uniqueEmail(email, callback)
+    {
+        db.query('SELECT * FROM t_user WHERE usr_email=?', email, (err, result) =>{
+            if (err)
+                return callback(err);
+            callback(null, result.length);
         })
     }
 }

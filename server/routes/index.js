@@ -1,63 +1,26 @@
 const express = require('express');
 const router = express.Router();
 
-const user = require('./users');
+const user = require('./user');
 
-router.post('/authenticate', user.authenticate);
+router.route('/user')
+    .get(user.getUsers)
+    .post(user.createUser)
+    .all(function(req, res){
+        res.status(403);
+        res.send('Forbidden');
+    });
+
+router.route('/user/:id([0-9]+)')
+    .get(user.getUser);
 
 module.exports = router;
 
-//const User = require('../models/user');
 
-/* User exemple */
-/*router.route('/users')
-    .post((req, res) => {
-        let user = new User();
-        user.username = req.body.username;
-        user.email = req.body.email;
-        user.password = req.body.password;
+// Routes de connexion, Creer session coter serveur avec id user pour savoir si c'est bien lui qui envoi les requetes update de compte
 
-        user.save(function(err, user){
-            if (err)
-                res.send(err);
-            res.json({ message: 'User created ' + user.username })
-        });
-    })
-    .get((req, res) => {
-        User.find((err, users) => {
-            if (err)
-                res.send(err);
-            res.json(users);
-        });
-    });
-
-router.route('/users/:user_id')
-    .get((req, res) => {
-        User.findById(req.params.user_id, (err, user) => {
-            if (err)
-                res.send(err);
-            res.json(user);
-        });
-    })
-    .put((req, res) => {
-        User.findById(req.params.user_id, (err, user) => {
-             if (err)
-                 res.send(err);
-
-             user.username = req.body.username;
-             user.save((err) => {
-                 if (err)
-                     res.send(err);
-
-                 res.json({ message: 'User updated' });
-             })
-        });
-    })
-    .delete((req, res) => {
-        User.delete(req.params.user_id, (err, user) => {
-            if (err)
-                res.send(err);
-            res.json({ message: 'User deleted' });
-        })
-    });
-module.exports = router;*/
+// Pour token
+// Premiere connexion au site (pas user mais juste ouverture) echange de token unique, client le save, durabilite 24h
+// Stocker le token dans session coter serveur
+// A chaque envoi de requete verifier le token ?
+// TODO : Regarder Oauth 2

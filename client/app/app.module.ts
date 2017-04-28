@@ -13,24 +13,26 @@ import { AlertComponent } from './alert/alert.component';
 import {AlertService} from './alert.service';
 import { HomeComponent } from './home/home.component';
 import { LoginComponent } from './login/login.component';
-import {AuthGuard} from "./auth.guard";
-import {AuthenticationService} from "./authentication.service";
-import {UserService} from "./user.service";
+import {AuthGuard} from './auth.guard';
+import {AuthenticationService} from './authentication.service';
+import {UserService} from './user.service';
+import { EqualValidatorDirective } from './equal-validator.directive';
 
 @NgModule({
-    declarations: [
-        AppComponent,
-        RegistrationComponent,
-        AlertComponent,
-        HomeComponent,
-        LoginComponent
-    ],
     imports: [
         BrowserModule,
         FormsModule,
         HttpModule,
         AppRoutingModule,
         MaterialModule
+    ],
+    declarations: [
+        AppComponent,
+        RegistrationComponent,
+        AlertComponent,
+        HomeComponent,
+        LoginComponent,
+        EqualValidatorDirective
     ],
     providers: [AlertService, AuthGuard, AuthenticationService, UserService],
     bootstrap: [AppComponent]
