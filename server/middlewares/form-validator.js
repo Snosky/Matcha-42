@@ -2,13 +2,15 @@
 const Promise = require('bluebird');
 
 class Validator {
-    constructor(param, message) {
+    constructor(param, message, name) {
         this.param = param;
         this.message = message;
+        this.name = name;
         this.allTest = [];
     }
 
     getMessage() { return this.message };
+    getName() { return this.name };
 
     isEmail() {
         this.test(/^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/);
@@ -17,12 +19,22 @@ class Validator {
 
     test(regex) {
         const func = (regex) => {
-            return new Promise((resolve) => {
+            return new Promise(resolve => {
                 regex = new RegExp(regex);
                 resolve(regex.test(this.param));
             });
         };
         this.addToTest(func, [regex]);
+        return this;
+    }
+
+    equalTo(equal) {
+        const func = (equal) => {
+            return new Promise(resolve => {
+                resolve(!this.param.localeCompare(equal));
+            })
+        };
+        this.addToTest(func, [equal]);
         return this;
     }
 
@@ -41,21 +53,20 @@ class Validator {
     }
 
     isValid() {
-        let valid = true;
-
         return new Promise((resolve, reject) => {
             Promise.map(this.allTest, (test) => {
                 //valid = test.call.apply(null, test.params) ? valid : false;
                 return test.call.apply(null, test.params).then(
                     testIsValid => {
-                        valid = testIsValid ? valid : false;
+                        if (testIsValid === false)
+                            resolve(false);
                     },
                     error => {
                         reject(error);
                     }
                 );
              }).then(() => {
-                resolve(valid);
+                resolve(true);
              });
         });
     }
@@ -77,14 +88,16 @@ module.exports = (req, res, next) => {
     req.bodyCheck = (param, message) => {
         if (req.body[param] !== undefined)
         {
-            let i = validators.push(new Validator(req.body[param], message));
+            let i = validators.push(new Validator(req.body[param], message, param));
             return validators[i - 1];
         }
+        else
+            throw new Error(`Request body "${param}" unknown.`);
     };
 
     req.isFormValid = () => {
         let isValid = true;
-        let messages = [];
+        let messages = {};
 
         return new Promise((resolve, reject) => {
             Promise.map(validators, (validator) => {
@@ -92,9 +105,10 @@ module.exports = (req, res, next) => {
                     valid => {
                         if (!valid) {
                             isValid = false;
-                            messages.push(validator.getMessage());
+                            if (!messages[validator.getName()])
+                                messages[validator.getName()] = [];
+                            messages[validator.getName()].push(validator.getMessage());
                         }
-                        //isValid = valid ? isValid : false;
                     },
                     error => {
                         return reject(error);
