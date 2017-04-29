@@ -1,0 +1,49 @@
+extends layout
+
+block content
+    div.row
+        div.col.l4.push-l4.m8.push-m2.s10.push-s1.center
+            div.row
+                div.col.s12
+                    h3 Register to Matcha !
+            div.row
+                form(action='/register' method='post').col.s12
+                    div.row
+                        div.input-field.col.m6.s12
+                            select(name='sex' required)
+                                option(disabled selected) I am a robot
+                                option(value='woman') I am a woman
+                                option(value='man') I am a man
+                        div.input-field.col.m6.s12
+                            select(name='orientation' required)
+                                option(disabled selected) who love robots
+                                option(value='woman') who love womans
+                                option(value='man') who love mans
+                                option(value='bi') who love everyone
+                    div.row
+                        div.input-field.col.m6.s6
+                            input(type='text' name='firstname' required).validate
+                            label My first name is
+                        div.input-field.col.m6.s6
+                            input(type='text' name='lastname' required).validate
+                            label and my last name is
+                    div.row
+                        div.input-field.col.s12
+                            input(type='date' name='birthday' required).datepicker-birthday
+                            label i am born the
+                    div.row
+                        div.input-field.col.s12
+                            input(type='email' name='email' required).validate
+                            label Here is my email to contact me if needed
+                    div.row
+                        div.input-field.col.s12
+                            input(type='password' name='password' required).validate
+                            label My super strong password to protect me
+                    div.row
+                        div.input-field.col.s12
+                            input(type='password' name='passwordConf' required).validate
+                            label My super strong password again, to be sure
+                    div.row
+                        div.col.s12
+                            button(type='submit').btn.waves-effect.waves-light.btn-large.btn-block Submit
+                                i.material-icons.right send

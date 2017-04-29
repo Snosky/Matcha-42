@@ -5,7 +5,7 @@ const Promise = require('bluebird');
 
 class User
 {
-    constructor () { this.data = {}; return this; }
+    constructor () { this.data = { metas: {} }; return this; }
 
     /* Getters */
     get id() { return this.data.id; }
@@ -13,6 +13,7 @@ class User
     get password() { return this.data.password; }
     get activated() { return this.data.activated; }
     get token () { return this.data.token; }
+    get metas() { return this.data.metas; }
 
     /* Setters */
     set id(id) { this.data.id = id; }
@@ -20,6 +21,11 @@ class User
     set password(password) { this.data.password = password; }
     set activated(activated) { this.data.activated = activated; }
     set token(token) { this.data.token = token; }
+    set metas(metas) { this.data.metas = metas; }
+
+    /* User Meta TODO : PEut etre juste une tables avec les colonnes qui faut */
+    setMeta(name, value) { this.data.metas[name] = value; }
+    getMeta(name) { return this.data.metas[name]; }
 
     /* Method */
     hydrate(data)

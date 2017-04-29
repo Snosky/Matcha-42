@@ -4,8 +4,12 @@ const router = express.Router();
 const user = require('./user');
 
 router.get('/', (req, res) => { res.render('index') });
-router.get('register', (req, res) => { res.render('index') });
 
+router.route('/register')
+    .get((req, res) => { res.render('register') })
+    .post(user.registerValidation);
+
+/*
 router.route('/user')
     .get(user.getUsers)
     .post(user.createUser)
@@ -16,7 +20,7 @@ router.route('/user')
 
 router.route('/user/:id([0-9]+)')
     .get(user.getUser);
-
+*/
 module.exports = router;
 
 

@@ -33,10 +33,19 @@ module.exports.getUser = (req, res) => {
  * @param req
  * @param res
  */
-module.exports.createUser = (req, res) => {
-    req.bodyCheck('email', 'Email is not valid.').isEmail();
+module.exports.registerValidation = (req, res) => {
+    req.bodyCheck('sex', 'Sex is not valid.').isRequired().isIn(['man', 'woman']);
+    req.bodyCheck('orientation', 'Orientation is not valid.').isRequired().isIn(['man', 'woman', 'bi']);
+
+    req.bodyCheck('firstname', 'First name is not valid').isRequired();
+    req.bodyCheck('lastname', 'Last name is not valid').isRequired();
+console.log(req.body.birthday);
+    req.bodyCheck('birthday', 'Birthday is not valid.').isRequired().isDate();
+
+    req.bodyCheck('email', 'Email is not valid.').isRequired().isEmail();
     req.bodyCheck('email', 'Email is already used.').isUnique(User.uniqueEmail);
-    req.bodyCheck('password', 'Passwords do not match.').equalTo(req.body.passwordConf);
+
+    req.bodyCheck('password', 'Passwords do not match.').isRequired().equalTo(req.body.passwordConf);
     req.bodyCheck('password', 'Your password must have at least 1 uppercase letter, 1 number and be 6 character long.')
         .test(/^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{6,})\S$/);
 

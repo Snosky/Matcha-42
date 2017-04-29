@@ -2,7 +2,8 @@
 const Promise = require('bluebird');
 
 class Validator {
-    constructor(param, message, name) {
+    constructor(req, param, message, name) {
+        this.req = req.body;
         this.param = param;
         this.message = message;
         this.name = name;
@@ -21,7 +22,7 @@ class Validator {
         const func = (regex) => {
             return new Promise(resolve => {
                 regex = new RegExp(regex);
-                resolve(regex.test(this.param));
+                resolve(regex.test(this.value()));
             });
         };
         this.addToTest(func, [regex]);
@@ -31,17 +32,48 @@ class Validator {
     equalTo(equal) {
         const func = (equal) => {
             return new Promise(resolve => {
-                resolve(!this.param.localeCompare(equal));
+                const value = this.value();
+                resolve(!this.value().localeCompare(equal));
             })
         };
         this.addToTest(func, [equal]);
         return this;
     }
 
+    isRequired() {
+        const func = () => {
+            return new Promise(resolve => {
+                resolve(this.value() !== '');
+            });
+        };
+        this.addToTest(func);
+        return this;
+    }
+
+    isIn(array) {
+        const func = (array) => {
+            return new Promise(resolve => {
+                resolve(array.indexOf(this.value()) !== -1)
+            });
+        };
+        this.addToTest(func, [array]);
+        return this;
+    }
+
+    isDate() {
+        const func = () => {
+            return new Promise(resolve => {
+                resolve(!isNaN(Date.parse(this.value())))
+            });
+        };
+        this.addToTest(func);
+        return this;
+    }
+
     isUnique(dBfunc) {
         const func = (dBfunc) => {
             return new Promise((resolve, reject) => {
-                dBfunc(this.param, (err, result) => {
+                dBfunc(this.value(), (err, result) => {
                     if (err)
                         return reject(err);
                     resolve(!result);
@@ -79,6 +111,10 @@ class Validator {
         };
         this.allTest.push(push);
     }
+
+    value() {
+        return this.req[this.param] || '';
+    }
 }
 
 module.exports = (req, res, next) => {
@@ -86,13 +122,8 @@ module.exports = (req, res, next) => {
     let validators = [];
 
     req.bodyCheck = (param, message) => {
-        if (req.body[param] !== undefined)
-        {
-            let i = validators.push(new Validator(req.body[param], message, param));
-            return validators[i - 1];
-        }
-        else
-            throw new Error(`Request body "${param}" unknown.`);
+        let i = validators.push(new Validator(req, param, message, param));
+        return validators[i - 1];
     };
 
     req.isFormValid = () => {

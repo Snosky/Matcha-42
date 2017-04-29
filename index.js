@@ -5,11 +5,7 @@ const formValidator = require('./middlewares/form-validator');
 const app = express();
 
 app.set('view engine', 'pug');
-
-app.use(function(req, res, next) {
-    req.headers['content-type'] = "application/json";
-    next();
-});
+app.use(express.static('public'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
