@@ -119,6 +119,16 @@ class Validator {
 
 module.exports = (req, res, next) => {
 
+    if (req.session._formInputs) {
+        res.locals.formInputs = req.session._formInputs;
+        req.session._formInputs = undefined;
+    }
+
+    if (req.session._formErrors) {
+        res.locals.formErrors = req.session._formErrors;
+        req.session._formErrors = undefined;
+    }
+
     let validators = [];
 
     req.bodyCheck = (param, message) => {
@@ -128,17 +138,20 @@ module.exports = (req, res, next) => {
 
     req.isFormValid = () => {
         let isValid = true;
-        let messages = {};
+        let inputs = {};
+        let errors = {};
 
         return new Promise((resolve, reject) => {
             Promise.map(validators, (validator) => {
                 return validator.isValid().then(
                     valid => {
+                        inputs[validator.getName()] = validator.value();
                         if (!valid) {
                             isValid = false;
-                            if (!messages[validator.getName()])
-                                messages[validator.getName()] = [];
-                            messages[validator.getName()].push(validator.getMessage());
+                            if (!errors[validator.getName()]) {
+                                errors[validator.getName()] = [];
+                            }
+                            errors[validator.getName()].push(validator.getMessage());
                         }
                     },
                     error => {
@@ -146,7 +159,9 @@ module.exports = (req, res, next) => {
                     }
                 );
             }).then(() => {
-                resolve({ isValid: isValid, messages: messages });
+                req.session._formInputs = inputs;
+                req.session._formErrors = errors;
+                resolve(isValid);
             });
         });
     };

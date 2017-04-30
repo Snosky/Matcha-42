@@ -1,8 +1,11 @@
 extends layout
 
+block styles
+    link(rel='stylesheet' href='css/register.css')
+
 block content
     div.row
-        div.col.l4.push-l4.m8.push-m2.s10.push-s1.center
+        div.col.xl6.push-xl3.x8.push-x2.s10.push-s1.center.card-panel.register
             div.row
                 div.col.s12
                     h3 Register to Matcha !
@@ -11,14 +14,12 @@ block content
                     div.row
                         div.input-field.col.m6.s12
                             select(name='sex' required)
-                                option(disabled selected) I am a robot
                                 option(value='woman') I am a woman
                                 option(value='man') I am a man
                         div.input-field.col.m6.s12
                             select(name='orientation' required)
-                                option(disabled selected) who love robots
-                                option(value='woman') who love womans
                                 option(value='man') who love mans
+                                option(value='woman') who love womans
                                 option(value='bi') who love everyone
                     div.row
                         div.input-field.col.m6.s6
@@ -47,3 +48,8 @@ block content
                         div.col.s12
                             button(type='submit').btn.waves-effect.waves-light.btn-large.btn-block Submit
                                 i.material-icons.right send
+
+block scripts
+    script.
+        validateForm(!{JSON.stringify(locals.formInputs)}, !{JSON.stringify(locals.formErrors)});
+

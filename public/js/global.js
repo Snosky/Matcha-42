@@ -6,6 +6,8 @@ $(document).ready(function() {
     $('.datepicker-birthday').pickadate({
         selectMonths: true,
         selectYears: 100,
-        max: new Date()
+        max: new Date(),
+        formatSubmit: 'yyyy-mm-dd',
+        hiddenName: true
     });
 });

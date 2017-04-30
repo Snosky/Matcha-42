@@ -4,6 +4,7 @@ const db = mysql.createConnection({
     user: 'root',
     password: '',
     database: 'matcha',
+    multipleStatements: true
 });
 
 module.exports = db;

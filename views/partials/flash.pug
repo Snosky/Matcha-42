@@ -1,0 +1,10 @@
+if messages.error
+    div.row.flash
+        div.col.s12.card-panel.deep-orange.darken-1.white-text
+            for message in messages.error
+                p= message
+if messages.success
+    div.row.flash
+        div.col.s12.card-panel.green.lighten-1.white-text
+            for message in locals.messages.success
+                p= message

@@ -11,21 +11,13 @@ class User
     get id() { return this.data.id; }
     get email() { return this.data.email; }
     get password() { return this.data.password; }
-    get activated() { return this.data.activated; }
     get token () { return this.data.token; }
-    get metas() { return this.data.metas; }
 
     /* Setters */
     set id(id) { this.data.id = id; }
     set email(email) { this.data.email = email; }
     set password(password) { this.data.password = password; }
-    set activated(activated) { this.data.activated = activated; }
     set token(token) { this.data.token = token; }
-    set metas(metas) { this.data.metas = metas; }
-
-    /* User Meta TODO : PEut etre juste une tables avec les colonnes qui faut */
-    setMeta(name, value) { this.data.metas[name] = value; }
-    getMeta(name) { return this.data.metas[name]; }
 
     /* Method */
     hydrate(data)
@@ -35,21 +27,61 @@ class User
         this.id = data.usr_id;
         this.email = data.usr_email;
         this.password = data.usr_password;
-        this.activated = data.usr_activated;
         this.token = data.usr_token;
         return this;
     }
 
-    save(callback)
-    {
+    save(callback) {
         if (this.id) // Update
             update(this, callback);
         else
             create(this, callback);
     }
 
-    static find(callback)
-    {
+    verifyPassword(password, done) {
+        bcrypt.compare(password, this.password, (err, result) => {
+            done(result);
+        });
+    }
+
+    hashPassword(done) {
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(this.password, salt, (err, hash) => {
+                this.password = hash;
+                done();
+            });
+        });
+    }
+
+    generateToken(done) {
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(this.email, salt, (err, token) => {
+                this.token = token;
+                this.save((err, user) => {
+                    if (err)
+                        return done(err);
+                    done(null, user);
+                });
+            });
+        });
+    }
+
+    /*static check(email, password, callback) {
+        db.query('SELECT * FROM t_user WHERE usr_email=?', email, (err, user) => {
+            if (err)
+                return callback(err);
+            if (user[0] === undefined)
+                return callback(null, null);
+            bcrypt.compare(password, user[0].usr_password, (err, result) => {
+                if (result === false) {
+                    return callback(null, null);
+                }
+                callback (null, new User().hydrate(user[0]));
+            });
+        });
+    }*/
+
+    static find(callback) {
         db.query('SELECT * FROM t_user', (err, result) => {
             if (err)
                 return callback(err);
@@ -61,8 +93,7 @@ class User
         });
     }
 
-    static findById(user_id, callback)
-    {
+    static findById(user_id, callback) {
         db.query('SELECT * FROM t_user WHERE usr_id=?', user_id, (err, result) => {
             if (err)
                 return callback(err);
@@ -71,9 +102,28 @@ class User
         });
     }
 
+    static findByEmail(email, callback) {
+        db.query('SELECT * FROM t_user WHERE usr_email=?', email, (err, result) => {
+            if (err)
+                return callback(err);
+            if (result[0] === undefined)
+                return callback(null, null);
+            return callback(null, new User().hydrate(result[0]));
+        })
+    }
+
+    static findByToken(token, callback) {
+        db.query('SELECT * FROM t_user WHERE usr_token=?', token, (err, result) => {
+            if (err)
+                return callback(err);
+            if (result[0] === undefined)
+                return callback(null, null);
+            return callback(null, new User().hydrate(result[0]));
+        });
+    }
+
     /* TODO : Peut etre pas en static */
-    static remove(user_id, callback)
-    {
+    static remove(user_id, callback) {
         db.query('DELETE FROM t_user WHERE usr_id=?', user_id, (err, result) => {
             if (err)
                 return callback(err);
@@ -81,8 +131,7 @@ class User
         })
     }
 
-    static uniqueEmail(email, callback)
-    {
+    static uniqueEmail(email, callback) {
         db.query('SELECT * FROM t_user WHERE usr_email=?', email, (err, result) =>{
             if (err)
                 return callback(err);
@@ -97,35 +146,31 @@ function update(user, callback)
     let data = {
         usr_email: user.email,
         usr_password: user.password,
-        usr_activated: user.activated,
+        usr_token: user.token,
     };
 
     db.query('UPDATE t_user SET ? WHERE usr_id=?', [data, user.id], (err, result) => {
         if (err)
             return callback(err);
+        user.hydrate(data);
         callback(null, user);
     });
 }
 
 function create(user, callback)
 {
-    bcrypt.genSalt(10, (err, salt) => {
-         bcrypt.hash(user.password, salt, (err, hash) => {
-             let data = {
-                 usr_email: user.email,
-                 usr_password: hash,
-                 usr_activated: 0,
-             };
+     let data = {
+         usr_email: user.email,
+         usr_password: user.password,
+     };
 
-             db.query('INSERT INTO t_user SET ?', data, (err, result) => {
-                 if (err)
-                     return callback(err);
-                 user.hydrate(data);
-                 user.id = result.insertId;
-                 callback(null, user);
-             });
-         });
-    });
+     db.query('INSERT INTO t_user SET ?', data, (err, result) => {
+         if (err)
+             return callback(err);
+         user.hydrate(data);
+         user.id = result.insertId;
+         callback(null, user);
+     });
 }
 
 function generateToken()
@@ -135,8 +180,8 @@ function generateToken()
 
 /* To Json */
 User.prototype.toJSON = function(){
-    let {id, email, password, activated, token} = this.data;
-    return {id, email, password, activated, token};
+    let {id, email, password, token} = this.data;
+    return {id, email, password, token};
 };
 
 module.exports = User;
