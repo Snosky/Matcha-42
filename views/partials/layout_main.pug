@@ -10,14 +10,12 @@ html
         link(rel='stylesheet' href='http://fonts.googleapis.com/icon?family=Material+Icons')
         link(rel='stylesheet' href='/materialize/css/materialize.min.css' media='screen,projection')
         link(rel='stylesheet' href='/css/global.css')
-        block styles
+        block main_styles
     body
-        div.container
-            include partials/flash
-            block content
+        block main_layout
 
         script(type='text/javascript' src='/js/jquery-3.2.1.min.js')
         script(type='text/javascript' src='/materialize/js/materialize.min.js')
         script(type='text/javascript' src='/js/validateForm.js')
-        block scripts
+        block main_scripts
         script(type='text/javascript' src='/js/global.js')

@@ -1,6 +1,6 @@
 const express = require('express');
 
-const userConnection = require('../middlewares/user-connection');
+const email = require('../middlewares/mail');
 
 const User = require('../models/user');
 const UserMeta = require('../models/userMeta');
@@ -146,8 +146,21 @@ module.exports.forgetPasswordValidation = (req, res, next) => {
                             return res.status(500).send('Database error');
                         }
 
-                        console.log(user.token); // TODO : Remvoe
-                        return res.redirect('/login');
+                        let mailOptions = {
+                            from: '"Matcha 42" <matcha.4242@gmail.com>',
+                            to: user.email,
+                            subject: 'Matcha - Password reset',
+                            text: `Please copy/past this link to reset your password http://localhost:3000/reset/${user.token}`,
+                            html: `Please click <a href="http://localhost:3000/reset/${user.token}">click here</a> to reset your password.`
+                        };
+
+                        email.sendMail(mailOptions, (err, info) => {
+                            if (err) {
+                                console.log(err);
+                                return res.status(500).send('Server error');
+                            }
+                            return res.redirect('/login');
+                        });
                     });
                 }
                 else

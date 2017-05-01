@@ -10,4 +10,12 @@ $(document).ready(function() {
         formatSubmit: 'yyyy-mm-dd',
         hiddenName: true
     });
+
+    $('.dropdown-button').dropdown({
+        inDuration: 300,
+        outDuration: 225,
+        hover: false,
+        belowOrigin: true,
+        alignment: 'right'
+    });
 });

@@ -1,16 +1,10 @@
-extends layout
-
-block styles
-    link(rel='stylesheet' href='css/register.css')
+extends partials/layout_not_logged
 
 block content
-    div.row
-        div.col.xl6.push-xl3.x8.push-x2.s10.push-s1.center.card-panel.register
-            div.row
-                div.col.s12
-                    h3 Register to Matcha !
-            div.row
-                form(action='/register' method='post').col.s12
+        h4.indigo-text.center.text-accent-4 Register to Matcha !
+        div.row
+            div.z-depth-1.grey.lighten-4.row.col.m6.offset-m3.s12.form-container
+                form(method='post').col.s12
                     div.row
                         div.input-field.col.m6.s12
                             select(name='sex' required)
@@ -22,10 +16,10 @@ block content
                                 option(value='woman') who love womans
                                 option(value='bi') who love everyone
                     div.row
-                        div.input-field.col.m6.s6
+                        div.input-field.col.m6.s12
                             input(type='text' name='firstname' required).validate
                             label My first name is
-                        div.input-field.col.m6.s6
+                        div.input-field.col.m6.s12
                             input(type='text' name='lastname' required).validate
                             label and my last name is
                     div.row
@@ -45,9 +39,10 @@ block content
                             input(type='password' name='passwordConf' required).validate
                             label My super strong password again, to be sure
                     div.row
-                        div.col.s12
-                            button(type='submit').btn.waves-effect.waves-light.btn-large.btn-block Submit
-                                i.material-icons.right send
+                        div.col.s12.center
+                            button(type='submit').col.s12.btn.waves-effect.waves-light.btn-large REGISTER
+            div.col.s12.center
+                a(href='/login') Already registered ?
 
 block scripts
     script.

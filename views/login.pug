@@ -1,28 +1,25 @@
-extends layout
+extends partials/layout_not_logged
 
 block content
+    h5.indigo-text.center.text-accent-4 Please, login into your account
     div.row
-        div.col.xl6.push-xl3.x8.push-x2.s10.push-s1.center.card-panel.login
-            div.row
-                div.col.s12
-                    h3 Login
-            div.row
-                form(action='/login' method='post').col.s12
-                    div.row
-                        div.input-field.col.s12
-                            input(type='email' name='email' required).validate
-                            label Here is my email
-                    div.row
-                        div.input-field.col.s12
-                            input(type='password' name='password' required).validate
-                            label My super strong password
-                    div.row
-                        div.col.s12
-                            a(href='/forget') Forgotten your password ?
-                    div.row
-                        div.col.s12
-                            button(type='submit').btn.waves-effect.waves-light.btn-large.btn-block Submit
-                                i.material-icons.right send
+        div.z-depth-1.grey.grey.lighten-4.row.col.m4.offset-m4.s12.form-container
+            form(action='/login' method='post').col.s12
+                div.row
+                    div.input-field.col.s12
+                        input(type='email' name='email' required).validate
+                        label Email adress
+                div.row
+                    div.input-field.col.s12
+                        input(type='password' name='password' required).validate
+                        label Password
+                        div.right
+                            a(href='/forget').pink-text Forgot password ?
+                div.row
+                    div.col.s12.center
+                        button(type='submit').col.s12.btn.waves-effect.waves-light.btn-large LOGIN
+        div.col.s12.center
+            a(href='/register') Create account
 
 block scripts
     script.

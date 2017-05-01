@@ -1,0 +1,34 @@
+extends  layout_main
+
+block main_styles
+    block styles
+
+block main_layout
+    ul#user-dropdown.dropdown-content
+        li
+            a(href='/profile') My Profile
+                i.material-icons perm_identity
+        li
+            a(href='logout') Logout
+                i.material-icons power_settings_new
+
+    nav(role='navigation').light-blue.lighten-1
+        div.nav-wrapper.container
+            a(href='/')#logo-container.brand-logo Matcha
+            ul.right.hide-on-med-and-down
+                li
+                    a(href='#!' data-activates="user-dropdown").dropdown-button.valign-wrapper
+                        img(src='/img/profile_image.jpg').circle.left
+                        | Tristan Payen
+                        i.material-icons.right arrow_drop_down
+                        //TODO : Recup lastname/firstname/profile pic
+
+    div.container
+        main
+            include flash
+        block content
+
+block main_scripts
+    block scripts
+
+

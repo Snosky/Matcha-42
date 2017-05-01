@@ -1,0 +1,14 @@
+extends layout_main
+block main_styles
+    link(rel='stylesheet' href='/css/layout_not_logged.css')
+    block styles
+
+block main_layout
+    div.container
+        include flash
+    main
+        div.container
+            block content
+
+block main_scripts
+    block scripts
