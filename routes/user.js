@@ -133,6 +133,7 @@ module.exports.forgetPasswordValidation = (req, res, next) => {
                 return next();
 
             req.flash('success', 'An email has been send to you.');
+
             User.findByEmail(req.body.email, (err, user) => {
                 if (err) {
                     console.log(err);

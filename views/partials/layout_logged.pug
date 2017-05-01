@@ -19,7 +19,7 @@ block main_layout
                 li
                     a(href='#!' data-activates="user-dropdown").dropdown-button.valign-wrapper
                         img(src='/img/profile_image.jpg').circle.left
-                        | Tristan Payen
+                        =user.metas.firstname.value + ' ' + user.metas.lastname.value
                         i.material-icons.right arrow_drop_down
                         //TODO : Recup lastname/firstname/profile pic
 

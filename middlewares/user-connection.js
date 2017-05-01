@@ -1,15 +1,32 @@
 let validationFunc = undefined;
+let ifConnected = undefined;
+
+//const User = require('../models/user');
 
 module.exports = (req, res, next) => {
     if (req.session === undefined) throw Error('user-connection require sessions');
 
-    req.user = req.session.user;
-    res.locals.user = req.session.user;
-    next();
+    if (req.session && req.session.user && ifConnected !== undefined) {
+        ifConnected(req.session.user, (err, user) => {
+            if (err)
+                return res.status(500).send('Database error omg');
+            req.user = user;
+            res.locals.user = user;
+            next();
+        })
+    } else {
+        req.user = req.session.user;
+        res.locals.user = req.session.user;
+        next();
+    }
 };
 
 module.exports.use = (func) => {
      validationFunc = func;
+};
+
+module.exports.ifConnected = (func) => {
+    ifConnected = func;
 };
 
 module.exports.notLogged = (options) => {
@@ -48,7 +65,7 @@ module.exports.connect = (failureRedirect) => {
                     return res.redirect(failureRedirect);
                 }
                 req.flash('success', 'You are now connected.');
-                req.session.user = user.id;
+                req.session.user = user;
                 return next();
             });
         }

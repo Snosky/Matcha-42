@@ -47,9 +47,19 @@ userConnection.use((email, password, done) => {
                         return done(err);
                     return done(null, user);
                 });
-            } else
+            } else {
                 return done(null, user);
+            }
         });
+    });
+});
+
+userConnection.ifConnected((user, done) => {
+    user = User.fromJSON(user);
+    user.getMetas((err, result) => {
+         if (err)
+             return done(err);
+         return done(null, user);
     });
 });
 

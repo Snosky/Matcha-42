@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const db = require('../config/db');
 const Promise = require('bluebird');
 
+const UserMeta = require('./userMeta');
+
 class User
 {
     constructor () { this.data = { metas: {} }; return this; }
@@ -12,15 +14,17 @@ class User
     get email() { return this.data.email; }
     get password() { return this.data.password; }
     get token () { return this.data.token; }
+    get metas () { return this.data.metas; }
 
     /* Setters */
     set id(id) { this.data.id = id; }
     set email(email) { this.data.email = email; }
     set password(password) { this.data.password = password; }
     set token(token) { this.data.token = token; }
+    set metas(metas) { this.data.metas = metas; }
 
     /* Method */
-    hydrate(data)
+     hydrate(data)
     {
         if (!data)
             return false;
@@ -66,32 +70,16 @@ class User
         });
     }
 
-    /*static check(email, password, callback) {
-        db.query('SELECT * FROM t_user WHERE usr_email=?', email, (err, user) => {
+    getMetas(done) {
+        UserMeta.getUserMetas(this.id, (err, result) => {
             if (err)
-                return callback(err);
-            if (user[0] === undefined)
-                return callback(null, null);
-            bcrypt.compare(password, user[0].usr_password, (err, result) => {
-                if (result === false) {
-                    return callback(null, null);
-                }
-                callback (null, new User().hydrate(user[0]));
-            });
-        });
-    }*/
-
-    static find(callback) {
-        db.query('SELECT * FROM t_user', (err, result) => {
-            if (err)
-                return callback(err);
-            Promise.map(result, (user, id) => {
-                return result[id] = new User().hydrate(user);
-            }).then(() => {
-                callback(null, result)
-            });
+                return done(err);
+            this.metas = result;
+            done(null, this);
         });
     }
+
+    /* == STATIC FUNCTIONS == */
 
     static findById(user_id, callback) {
         db.query('SELECT * FROM t_user WHERE usr_id=?', user_id, (err, result) => {
@@ -122,21 +110,27 @@ class User
         });
     }
 
-    /* TODO : Peut etre pas en static */
-    static remove(user_id, callback) {
-        db.query('DELETE FROM t_user WHERE usr_id=?', user_id, (err, result) => {
-            if (err)
-                return callback(err);
-            callback(null, result.affectedRows);
-        })
-    }
-
     static uniqueEmail(email, callback) {
         db.query('SELECT * FROM t_user WHERE usr_email=?', email, (err, result) =>{
             if (err)
                 return callback(err);
             callback(null, result.length);
         })
+    }
+
+    /* JSON */
+    toJSON() {
+        let {id, email, password, token, metas} = this.data;
+        return {id, email, password, token, metas};
+    }
+
+    static fromJSON(obj) {
+        let user = new User();
+        user.id = obj.id;
+        user.email = obj.email;
+        user.password = obj.password;
+        user.token = obj.token;
+        return user;
     }
 }
 
@@ -173,15 +167,5 @@ function create(user, callback)
      });
 }
 
-function generateToken()
-{
-
-}
-
-/* To Json */
-User.prototype.toJSON = function(){
-    let {id, email, password, token} = this.data;
-    return {id, email, password, token};
-};
 
 module.exports = User;
