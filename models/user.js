@@ -7,7 +7,7 @@ const UserMeta = require('./userMeta');
 
 class User
 {
-    constructor () { this.data = { metas: {} }; return this; }
+    constructor () { this.data = { metas: [] }; return this; }
 
     /* Getters */
     get id() { return this.data.id; }
@@ -22,6 +22,12 @@ class User
     set password(password) { this.data.password = password; }
     set token(token) { this.data.token = token; }
     set metas(metas) { this.data.metas = metas; }
+
+    getMeta(name) {
+        return this.metas.find((meta) => {
+            return meta.name === name;
+        });
+    }
 
     /* Method */
      hydrate(data)
@@ -76,6 +82,30 @@ class User
                 return done(err);
             this.metas = result;
             done(null, this);
+        });
+    }
+
+    saveMetas(done) {
+         UserMeta.saveMultiple(this.metas, done);
+    }
+
+    setMeta(name, value) {
+        let meta = this.getMeta(name);
+        if (meta) {
+            meta.value = value;
+        } else {
+            meta = new UserMeta();
+            meta.name = name;
+            meta.value = value;
+            meta.userId = this.id;
+            this.metas.push(meta);
+        }
+        return meta;
+    }
+
+    setMetas(metas) {
+        metas.forEach((meta) => {
+            this.setMeta(meta.name, meta.value);
         });
     }
 

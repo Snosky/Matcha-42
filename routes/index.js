@@ -10,8 +10,7 @@ router.get('/', userConnection.logged(), (req, res) => { res.render('index') });
 // Register routes
 router.route('/register')
     .get(userConnection.notLogged(), (req, res) => { res.render('register') })
-    .post(
-        [
+    .post([
             userConnection.notLogged({ redirect: '/' }),
             user.registerValidation
         ],
@@ -21,8 +20,7 @@ router.route('/register')
 // Login routes
 router.route('/login')
     .get(userConnection.notLogged(), (req, res) => { res.render('login') })
-    .post(
-        [
+    .post([
             userConnection.notLogged(),
             user.loginValidation,
             userConnection.connect('/login')
@@ -35,30 +33,59 @@ router.get('/logout', [userConnection.logged(), userConnection.disconnect], (req
 // Password reset
 router.route('/forget')
     .get(userConnection.notLogged(), (req, res) => { res.render('password_forget') })
-    .post(
-        [
+    .post([
             userConnection.notLogged(),
             user.forgetPasswordValidation,
         ],
-        (req, res) => { res.redirect('/forget'); }
-    );
+        (req, res) => { res.redirect('/forget'); });
 
 router.route('/reset/:token*')
-    .get(
-        [
+    .get([
             userConnection.notLogged(),
             user.confirmToken,
         ],
-        (req, res) => { res.render('password_reset', { token: req.user.token }) }
-    )
+        (req, res) => { res.render('password_reset', { token: req.user.token }) })
     .post(
         [
             userConnection.notLogged(),
             user.confirmToken,
             user.resetPasswordValidation,
         ],
-        (req, res) => { console.log('salut'); res.redirect('/reset/' + req.user.token) }
-    );
+        (req, res) => { console.log('salut'); res.redirect('/reset/' + req.user.token) });
+
+// User profile
+router.route('/profile')
+    .get(userConnection.logged(), (req, res) => { res.render('profile_edit') })
+    .post([
+        userConnection.logged(),
+        user.profilePrivateValidation
+    ], (req, res) => { res.redirect('/profile#private')} );
+
+router.post('/profile/public',
+    [
+        userConnection.logged(),
+        user.profilePublicValidation
+    ],
+    (req, res) => { res.redirect('/profile#public') });
+
+router.post('/profile/images',
+    [
+        userConnection.logged(),
+        user.picsValidation
+    ],
+    (req, res) => { res.redirect('/profile#pics') });
+
+router.get('/profile/images/set/:index([0-5])', [
+        userConnection.logged(),
+        user.setProfilPic
+    ],
+    (req, res) => { res.redirect('/profile#pics') });
+
+router.get('/profile/images/delete/:index([0-5])', [
+        userConnection.logged(),
+        user.deletePic
+    ],
+    (req, res) => { res.redirect('/profile#pics') });
 
 /*
 router.route('/user')

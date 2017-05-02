@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 
 const email = require('../middlewares/mail');
 
@@ -70,15 +71,16 @@ module.exports.registerValidation = (req, res, next) => {
                             return res.status(500).send('Database error');
                         }
 
-                        let metas = [
+                        user.setMetas([
                             { name: 'sex', value: req.body.sex },
                             { name: 'orientation', value: req.body.orientation },
                             { name: 'firstname', value: req.body.firstname },
                             { name: 'lastname', value: req.body.lastname },
-                            { name: 'birthday', value: req.body.birthday }
-                        ];
+                            { name: 'birthday', value: req.body.birthday },
+                            { name: 'bio', value: null },
+                        ]);
 
-                        UserMeta.saveMultiple(user.id, metas, (err, result) => {
+                        user.saveMetas((err, result) => {
                             if (err) {
                                 console.log(err);
                                 return res.status(500).send('Database error');
@@ -200,6 +202,12 @@ module.exports.confirmToken = (req, res, next) => {
     });
 };
 
+/**
+ * Valid reset password form and save password if valid
+ * @param req
+ * @param res
+ * @param next
+ */
 module.exports.resetPasswordValidation = (req, res, next) => {
     req.bodyCheck('password', 'Passwords do not match.').isRequired().equalTo(req.body.passwordConf);
     req.bodyCheck('password', 'Your password must have at least 1 uppercase letter, 1 number and be 6 character long.')
@@ -227,4 +235,182 @@ module.exports.resetPasswordValidation = (req, res, next) => {
                 });
             }
         )
+};
+
+/**
+ * Valid private profile form and save
+ * @param req
+ * @param res
+ * @param next
+ */
+module.exports.profilePrivateValidation = (req, res, next) => {
+    req.user.verifyPassword(req.body.password, valid => {
+        if (valid) {
+
+            req.user.password = req.body.password;
+
+            if (req.body.email && req.user.email !== req.body.email) { // Only if email is different
+                req.bodyCheck('email', 'Email is not valid.').isRequired().isEmail();
+                req.bodyCheck('email', 'Email is already used.').isUnique(User.uniqueEmail);
+                req.user.email = req.body.email;
+            }
+
+            if (req.body.newPassword && req.body.newPassword !== '') {
+                req.bodyCheck('newPassword', 'Passwords do not match.').equalTo(req.body.newPasswordConf);
+                req.bodyCheck('newPassword', 'Your password must have at least 1 uppercase letter, 1 number and be 6 character long.')
+                    .test(/^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{6,})\S$/);
+                req.user.password = req.body.newPassword;
+            }
+
+            req.isFormValid().then(
+                valid => {
+                    if (valid === false)
+                        return next();
+
+                    req.user.hashPassword(() => {
+                        req.user.save((err, user) => {
+                            if (err)
+                                return res.status(500).send('Database error');
+                            req.flash('success', 'Profile updated.');
+                            return next();
+                        });
+                    });
+                }
+            );
+
+
+        } else {
+            req.flash('error', 'Password is not valid.');
+            return next();
+        }
+    });
+};
+
+/**
+ * Valid and save public profile form
+ * @param req
+ * @param res
+ * @param next
+ */
+module.exports.profilePublicValidation = (req, res, next) => {
+    req.bodyCheck('sex', 'Sex is not valid.').isRequired().isIn(['man', 'woman']);
+    req.bodyCheck('orientation', 'Orientation is not valid.').isRequired().isIn(['man', 'woman', 'bi']);
+
+    req.bodyCheck('firstname', 'First name is not valid').isRequired();
+    req.bodyCheck('lastname', 'Last name is not valid').isRequired();
+
+    req.isFormValid().then(
+        valid => {
+            if (valid === false)
+                return next();
+
+            req.user.setMetas([
+                { name: 'sex', value: req.body.sex },
+                { name: 'orientation', value: req.body.orientation },
+                { name: 'firstname', value: req.body.firstname },
+                { name: 'lastname', value: req.body.lastname },
+                { name: 'bio', value: req.body.bio || req.user.metas.bio }
+                //{ name: 'images', value: ['img1', 'img2', 'img3', 'img4', 'img5']}
+            ]);
+
+            req.user.saveMetas((err, result) => {
+                if (err) {
+                    console.log(err);
+                    return res.status(500).send('Database error');
+                }
+                req.flash('success', 'Public profile updated.');
+                return next();
+            });
+        }
+    );
+};
+
+/**
+ * Valid, upload and save images
+ * @param req
+ * @param res
+ * @param next
+ */
+module.exports.picsValidation = (req, res, next) => {
+
+    const upload = require('../middlewares/upload-images');
+    let userImages = req.user.getMeta('images');
+    userImages = userImages ? userImages.value : [];
+
+    upload.array('images', 5 - userImages.length)(req, res, (err) => {
+        if (err) {
+            if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+                req.flash('error', 'Too many files, max files allowed ' + (5 - userImages.length));
+                return next();
+            } else {
+                console.log(err);
+                return res.status(500).send('Server error');
+            }
+        }
+
+        req.files.forEach((file) => {
+            userImages.push(file.filename);
+        });
+
+        req.user.setMeta('images', userImages);
+        req.user.saveMetas((err, result) => {
+            if (err) {
+                req.files.forEach((file) => {
+                    fs.unlink(file.path);
+                });
+                res.status(500).send('Database error');
+            }
+
+            req.flash('success', 'Images added.');
+            next();
+        });
+    });
+};
+
+/**
+ * Set the profil pics (Params index = meta images array index)
+ * @param req
+ * @param res
+ * @param next
+ */
+module.exports.setProfilPic = (req, res, next) => {
+
+    let userImages = req.user.getMeta('images');
+
+    if (userImages && userImages.value[req.params.index]) {
+        req.user.setMeta('profile-image', userImages.value[req.params.index]);
+        req.user.saveMetas((err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).send('Database error');
+            }
+            req.flash('success', 'Profile pic set.');
+            next();
+        });
+    }
+};
+
+module.exports.deletePic = (req, res, next) => {
+    let userImages = req.user.getMeta('images');
+
+    if (userImages && userImages.value[req.params.index]) {
+        fs.unlink('public/images_upload/' + userImages.value[req.params.index], (err) => {
+            if (err)
+                console.error(err);
+        });
+        userImages.value.splice(req.params.index, 1);
+
+        req.user.saveMetas((err, result) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Database error');
+            }
+
+            req.flash('success', 'Image deleted.');
+            return next();
+        })
+    } else {
+        req.flash('error', 'Image not found.');
+        return next();
+    }
 };

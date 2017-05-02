@@ -1,0 +1,123 @@
+extends partials/layout_logged
+
+block content
+    h3.indigo-text.center.text-accent-4 My profile
+    div.row
+        div.col.s12.z-depth-1.grey.grey.lighten-4
+            ul.tabs.grey.grey.lighten-4
+                li.tab.col.s3
+                    a(href='#private') Private informations
+                li.tab.col.s3
+                    a(href='#public') Public informations
+                li.tab.col.s3
+                    a(href='#pics') My Pics
+                li.tab.col.s3
+                    a(href='#tags') My Tags
+        div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#private
+            form(method='POST')
+                div.row
+                    p.col.s12.grey-text.flow-text To edit your email or change your password, you have to enter your actual password.
+                div.row
+                    div.input-field.col.s12
+                        input(type='email' name='email' required value=user.email).validate
+                        label Email address
+                div.row
+                    div.input-field.col.s12
+                        input(type='password' name='password' required).validate
+                        label Password
+                div.row
+                    div.input-field.col.s12
+                        input(type='password' name='newPassword').validate
+                        label New password
+                div.row
+                    div.input-field.col.s12
+                        input(type='password' name='newPasswordConf').validate
+                        label New password confirmation
+                div.row
+                    div.col.s12.center
+                        button(type='submit').col.s12.btn.waves-effect.waves-light.btn-large UPDATE
+
+        div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#public
+            form(action='profile/public' method='POST')
+                div.row
+                    p.col.s12.grey-text.flow-text Let people learn more about you
+                div.row
+                    div.input-field.col.m6.s12
+                        select(name='sex' required)
+                            - var sex = user.getMeta('sex').value;
+                            option(value='woman' selected=sex == 'woman') I am a woman
+                            option(value='man' selected=sex == 'man') I am a man
+                    div.input-field.col.m6.s12
+                        select(name='orientation' required)
+                            - var orientation = user.getMeta('orientation').value
+                            option(value='man' selected=orientation == 'man') who love mans
+                            option(value='woman' selected=orientation == 'woman') who love womans
+                            option(value='bi' selected=orientation == 'bi') who love everyone
+                div.row
+                    div.input-field.col.m6.s12
+                        input(type='text' name='firstname' required value=user.getMeta('firstname').value).validate
+                        label My first name is
+                    div.input-field.col.m6.s12
+                        input(type='text' name='lastname' required value=user.getMeta('lastname').value).validate
+                        label and my last name is
+                div.row
+                    div.input-field.col.s12
+                        input(type='text' readonly value=user.getMeta('birthday').value)
+                        label i am born the
+                div.row
+                    div.input-field.col.s12
+                        textarea(name='bio')#bio.materialize-textarea= user.getMeta('bio').value
+                        label(for='bio') My Bio
+                div.row
+                    div.col.s12.center
+                        button(type='submit').col.s12.btn.waves-effect.waves-light.btn-large UPDATE
+
+        div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#pics
+            - var images = user.getMeta('images');
+            - var count = 5 - (images ? images.value.length : 0);
+            div.row
+                p.col.s12.grey-text.flow-text
+                    if count
+                        | You can add #{count} mores images, so choose well
+                    else
+                        | You can no longer add images, delete some if you want to add new ones
+            div.row
+            each imageUri, index in images ? images.value : []
+                div.col.s3
+                    div.card.light-blue.lighten-2.my-card-image
+                        div.card-content(style="background-image: url(images_upload/" + imageUri +");")
+                        div.card-action.row
+                            div.col.s6.center
+                                if profileImage && profileImage.value === imageUri
+                                    a(data-position="top" data-delay="50" data-tooltip="Unset profile pic").btn-floating.waves-effect.waves-light.light-green.lighten-1.tooltipped
+                                        i.material-icons done_all
+                                else
+                                    a(href='profile/images/set/' + index data-position="top" data-delay="50" data-tooltip="Set as profile pic").btn-floating.waves-effect.waves-light.light-blue.darken-1.tooltipped
+                                        i.material-icons done
+                            div.col.s6.center
+                                a(href='profile/images/delete/' + index data-position="top" data-delay="50" data-tooltip="Delete").btn-floating.waves-effect.waves-light.red.tooltipped
+                                    i.material-icons delete
+            if count
+                div.row
+                    form(action='/profile/images' method='POST' enctype='multipart/form-data')
+                        div.row
+                            div.file-field.input-field.col.s12
+                                div.btn
+                                    span ADD IMAGES
+                                    input(type='file' name='images' multiple accept='image/*')
+                                div.file-path-wrapper
+                                    - var max = 5 - (images ? images.value.length : 0)
+                                    input(type='text' placeholder='Upload one or more images (max ' + max + ')').file-path.validate
+                        div.row
+                            div.col.s12.center
+                                button(type='submit').col.s12.btn.waves-effect.waves-light UPLOAD
+        div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#tags
+            div.row
+                p.col.s12.grey-text.flow-text This help us to find compatible people to met.
+
+
+
+
+block scripts
+    script.
+        validateForm(!{JSON.stringify(locals.formInputs)}, !{JSON.stringify(locals.formErrors)});

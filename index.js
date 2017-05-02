@@ -67,3 +67,8 @@ const routes = require('./routes');
 app.use('/', routes);
 
 module.exports = app;
+
+//TODO : Some link to help
+// https://material.uplabs.com/
+// http://clover.studio/2016/07/02/socket-io-best-practices/
+// http://www.mysqltutorial.org/mysql-str_to_date/

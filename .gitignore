@@ -64,3 +64,5 @@ typings/
 
 !/views/
 /matcha.mwb.bak
+/public/images_upload/*
+!/public/images_upload/.gitkeep

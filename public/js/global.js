@@ -2,6 +2,7 @@ $(document).ready(function() {
 
     // Materialize initialisation
     $('select').material_select();
+    $('.tooltipped').tooltip({delay: 50});
 
     $('.datepicker-birthday').pickadate({
         selectMonths: true,
