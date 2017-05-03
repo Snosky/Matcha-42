@@ -30,6 +30,10 @@ block main_layout
         block content
 
 block main_scripts
+    script(type='text/javascript' src='/socket.io/socket.io.js')
+    script.
+        var socket = io.connect();
+    script(type='text/javascript' src='/js/logged.js')
     block scripts
 
 

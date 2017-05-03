@@ -20,7 +20,3 @@ block content
                         button(type='submit').col.s12.btn.waves-effect.waves-light.btn-large LOGIN
         div.col.s12.center
             a(href='/register') Create account
-
-block scripts
-    script.
-        validateForm(!{JSON.stringify(locals.formInputs)}, !{JSON.stringify(locals.formErrors)});

@@ -15,12 +15,14 @@ const app = express();
 app.set('view engine', 'pug');
 app.use(express.static('public'));
 
-app.use(session({
+app.set('sessionMiddleware', session({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }
 }));
+
+app.use(app.get('sessionMiddleware'));
 app.use(cookieParser('keyboard cat'));
 
 app.use(bodyParser.json());

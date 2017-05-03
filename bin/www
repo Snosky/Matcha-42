@@ -11,6 +11,7 @@ mysql.connect((err) => {
     const server = http.createServer(app);
     const port = app.get('port');
     server.listen(port, () => {
+        require('../routes/socket.io')(server, app.get('sessionMiddleware'));
         console.log(`API running on localhost:${port}`);
     });
 });

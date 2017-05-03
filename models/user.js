@@ -4,6 +4,7 @@ const db = require('../config/db');
 const Promise = require('bluebird');
 
 const UserMeta = require('./userMeta');
+const Tag = require('./tag');
 
 class User
 {
@@ -23,10 +24,16 @@ class User
     set token(token) { this.data.token = token; }
     set metas(metas) { this.data.metas = metas; }
 
-    getMeta(name) {
-        return this.metas.find((meta) => {
+    getMeta(name, empty) {
+        empty = empty || false;
+
+        let ret = this.metas.find((meta) => {
             return meta.name === name;
         });
+        if (empty && ret === undefined)
+            return {};
+
+        return ret;
     }
 
     /* Method */

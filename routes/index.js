@@ -13,9 +13,7 @@ router.route('/register')
     .post([
             userConnection.notLogged({ redirect: '/' }),
             user.registerValidation
-        ],
-        (req, res) => { res.redirect('/register') }
-    );
+        ], (req, res) => { res.redirect('/register') });
 
 // Login routes
 router.route('/login')
@@ -24,9 +22,7 @@ router.route('/login')
             userConnection.notLogged(),
             user.loginValidation,
             userConnection.connect('/login')
-        ],
-        (req, res) => { res.redirect('/') }
-    );
+        ], (req, res) => { res.redirect('/') });
 
 router.get('/logout', [userConnection.logged(), userConnection.disconnect], (req, res) => { res.redirect('/login'); });
 
@@ -36,67 +32,50 @@ router.route('/forget')
     .post([
             userConnection.notLogged(),
             user.forgetPasswordValidation,
-        ],
-        (req, res) => { res.redirect('/forget'); });
+        ], (req, res) => { res.redirect('/forget'); });
 
 router.route('/reset/:token*')
     .get([
             userConnection.notLogged(),
             user.confirmToken,
-        ],
-        (req, res) => { res.render('password_reset', { token: req.user.token }) })
-    .post(
-        [
+        ], (req, res) => { res.render('password_reset', { token: req.user.token }) })
+    .post([
             userConnection.notLogged(),
             user.confirmToken,
             user.resetPasswordValidation,
-        ],
-        (req, res) => { console.log('salut'); res.redirect('/reset/' + req.user.token) });
+        ], (req, res) => { console.log('salut'); res.redirect('/reset/' + req.user.token) });
 
-// User profile
+// User own profile
 router.route('/profile')
-    .get(userConnection.logged(), (req, res) => { res.render('profile_edit') })
+    .get(userConnection.logged(), user.profile)
     .post([
         userConnection.logged(),
         user.profilePrivateValidation
     ], (req, res) => { res.redirect('/profile#private')} );
 
-router.post('/profile/public',
-    [
+router.post('/profile/public', [
         userConnection.logged(),
         user.profilePublicValidation
-    ],
-    (req, res) => { res.redirect('/profile#public') });
+    ], (req, res) => { res.redirect('/profile#public') });
 
-router.post('/profile/images',
-    [
+router.post('/profile/images', [
         userConnection.logged(),
         user.picsValidation
-    ],
-    (req, res) => { res.redirect('/profile#pics') });
+    ], (req, res) => { res.redirect('/profile#pics') });
 
 router.get('/profile/images/set/:index([0-5])', [
         userConnection.logged(),
         user.setProfilPic
-    ],
-    (req, res) => { res.redirect('/profile#pics') });
+    ], (req, res) => { res.redirect('/profile#pics') });
 
 router.get('/profile/images/delete/:index([0-5])', [
         userConnection.logged(),
         user.deletePic
-    ],
-    (req, res) => { res.redirect('/profile#pics') });
+    ], (req, res) => { res.redirect('/profile#pics') });
 
-/*
-router.route('/user')
-    .get(user.getUsers)
-    .post(user.createUser)
-    .all(function(req, res){
-        res.status(403);
-        res.send('Forbidden');
-    });
+// Users public profile
+router.get('/profile/:user_id([0-9]+)', [
+    userConnection.logged()
+    ], user.publicProfile);
 
-router.route('/user/:id([0-9]+)')
-    .get(user.getUser);
-*/
 module.exports = router;

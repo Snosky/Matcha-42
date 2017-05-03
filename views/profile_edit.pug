@@ -114,10 +114,16 @@ block content
         div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#tags
             div.row
                 p.col.s12.grey-text.flow-text This help us to find compatible people to met.
+            div.row
+                div.col.s12
+                    div.chips.chips-autocomplete
 
 
 
 
 block scripts
     script.
-        validateForm(!{JSON.stringify(locals.formInputs)}, !{JSON.stringify(locals.formErrors)});
+        var tags = !{JSON.stringify(tags)};
+        var userTags = !{JSON.stringify(userTags)};
+    script(type='text/javascript' src='js/tags.js')
+

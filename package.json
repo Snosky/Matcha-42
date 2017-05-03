@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon bin/www"
+    "dev": "nodemon bin/www",
+    "db": "node install.js"
   },
   "private": true,
   "dependencies": {
@@ -20,7 +21,10 @@
     "multer": "^1.3.0",
     "mysql": "^2.13.0",
     "nodemailer": "^4.0.1",
-    "pug": "^2.0.0-beta.12"
+    "pug": "^2.0.0-beta.12",
+    "socket.io": "^1.7.3"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "progress": "^2.0.0"
+  }
 }

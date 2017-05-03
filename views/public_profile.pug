@@ -1,0 +1,24 @@
+extends partials/layout_logged
+
+block styles
+    link(rel='stylesheet' href='/css/public_profile.css')
+
+block content
+    div.row
+        div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#profile
+            div.row
+                div.col.s3.center
+                    - var profileImage = profileUser.getMeta('profile-image', true);
+                    div(style='background-image: url(/images_upload/' + profileImage.value +');').profile-image
+                div.col.s9
+                    - var firstname = profileUser.getMeta('firstname', true).value;
+                    - var lastname = profileUser.getMeta('lastname', true).value;
+                    - var sex = profileUser.getMeta('sex', true).value;
+                    - var orientation = profileUser.getMeta('orientation', true).value;
+                    - var orAff = {bi: 'everyone', man: 'men', woman: 'women'}
+                    - var age = new Date().getFullYear() - profileUser.getMeta('birthday', true).value.split('-')[0];
+                    h3 #{firstname} #{lastname}
+                    h5 #{age}yo | I'm a #{sex} and I love #{orAff[orientation]}
+                    - var bio = profileUser.getMeta('bio');
+                    if bio
+                        p= bio.value

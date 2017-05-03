@@ -5,32 +5,7 @@ const email = require('../middlewares/mail');
 
 const User = require('../models/user');
 const UserMeta = require('../models/userMeta');
-
-/**
- * Return all users
- * @param req
- * @param res
- */
-module.exports.getUsers = (req, res) => {
-    res.send('Hello World');
-};
-
-/**
- * Return one user with request params ID
- * @param req
- * @param res
- */
-module.exports.getUser = (req, res) => {
-    User.findById(req.params.id, (err, user) => {
-        if (err)
-            return res.send(err);
-
-        if (!user)
-            return res.send('user not found');
-
-        res.json(user);
-    });
-};
+const Tag = require('../models/tag');
 
 /**
  * Create a new user
@@ -238,6 +213,32 @@ module.exports.resetPasswordValidation = (req, res, next) => {
 };
 
 /**
+ * Render profile page
+ * @param req
+ * @param res
+ */
+module.exports.profile = (req, res) => {
+    Tag.getAll((err, tags) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
+
+        Tag.getByUser(req.user.id, (err, userTags) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Database error');
+            }
+
+            res.render('profile_edit', {
+                tags: tags,
+                userTags: userTags
+            })
+        })
+    })
+};
+
+/**
  * Valid private profile form and save
  * @param req
  * @param res
@@ -390,6 +391,13 @@ module.exports.setProfilPic = (req, res, next) => {
     }
 };
 
+/**
+ * Delete user picture
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
 module.exports.deletePic = (req, res, next) => {
     let userImages = req.user.getMeta('images');
 
@@ -413,4 +421,107 @@ module.exports.deletePic = (req, res, next) => {
         req.flash('error', 'Image not found.');
         return next();
     }
+};
+
+module.exports.publicProfile = (req, res) => {
+    User.findById(req.params.user_id, (err, user) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Database error');
+        }
+
+        if (user === false)
+            return res.status(404).send('User not found');
+
+        user.getMetas((err, user) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Database error');
+            }
+
+            res.render('public_profile', {
+                profileUser: user
+            })
+        })
+    })
+};
+
+/* == SOCKET.IO == */
+module.exports.socket = (io, client) => {
+
+    /**
+     * Add a existing tag to user or create tag and add to user if not
+     * @param tag
+     * @returns {boolean}
+     */
+    const tagAdd = (tag) => {
+        if (tag.value === undefined)
+            return false;
+        if (tag.id)
+            Tag.addForUser(client.user.id, tag.id, (err, result) => {
+                if (err) {
+                    console.error(err);
+                    return false;
+                }
+                return true;
+            });
+        else
+            Tag.create(tag.value, (err, resultCreate) => {
+                if (err) {
+                    console.error(err);
+                    return false;
+                }
+
+                Tag.addForUser(client.user.id, resultCreate.insertId, (err, result) => {
+                    if (err) {
+                        console.error(err);
+                        return false;
+                    }
+                    client.emit('tag.getId', resultCreate.insertId);
+                    return true;
+                });
+            });
+    };
+    client.on('tag.add', tagAdd);
+
+    /**
+     * Remove a tag from user
+     * @param tag
+     * @returns {boolean}
+     */
+    const tagRemove = (tag) => {
+        if (tag.id === undefined)
+            return false;
+
+        Tag.deleteForUser(client.user.id, tag.id, (err, result) => {
+            if (err) {
+                console.error(err);
+                return false
+            }
+        })
+    };
+    client.on('tag.remove', tagRemove);
+
+    /**
+     * Save user position every 24hours
+     * @param geo
+     */
+    const geoUpdate = (geo) => {
+        let geoTime = client.user.getMeta('geo-timestamp');
+        let timestamp = new Date().getTime();
+
+        if (!geoTime || timestamp - geoTime.value > 86400000) // If more than a day, update
+        {
+            client.user.setMeta('geo-timestamp', timestamp);
+            client.user.setMeta('geo-long', geo.longitude);
+            client.user.setMeta('geo-lat', geo.latitude);
+            client.user.saveMetas((err, result) => {
+                if (err) {
+                    console.error(err);
+                    return false;
+                }
+            });
+        }
+    };
+    client.on('geo.update', geoUpdate);
 };

@@ -12,8 +12,8 @@ block content
                                 option(value='man') I am a man
                         div.input-field.col.m6.s12
                             select(name='orientation' required)
-                                option(value='man') who love mans
-                                option(value='woman') who love womans
+                                option(value='man') who love men
+                                option(value='woman') who love women
                                 option(value='bi') who love everyone
                     div.row
                         div.input-field.col.m6.s12
@@ -43,8 +43,4 @@ block content
                             button(type='submit').col.s12.btn.waves-effect.waves-light.btn-large REGISTER
             div.col.s12.center
                 a(href='/login') Already registered ?
-
-block scripts
-    script.
-        validateForm(!{JSON.stringify(locals.formInputs)}, !{JSON.stringify(locals.formErrors)});
 
