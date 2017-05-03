@@ -66,3 +66,4 @@ typings/
 /matcha.mwb.bak
 /public/images_upload/*
 !/public/images_upload/.gitkeep
+!/public/images_upload/demo/

@@ -43,7 +43,7 @@ router.route('/reset/:token*')
             userConnection.notLogged(),
             user.confirmToken,
             user.resetPasswordValidation,
-        ], (req, res) => { console.log('salut'); res.redirect('/reset/' + req.user.token) });
+        ], (req, res) => { res.redirect('/reset/' + req.user.token) });
 
 // User own profile
 router.route('/profile')
