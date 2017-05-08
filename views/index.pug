@@ -1,5 +1,68 @@
 extends partials/layout_logged
 
+block styles
+    link(rel='stylesheet' href='/css/index.css')
+
 block content
-    h1 Hello
-    a(href='/profile/' + user.id) PROFILE PAGE
+    ul.collapsible
+        li
+            div.collapsible-header Filters
+                i.material-icons search
+            div.collapsible-body
+                form(action='#')#filterForm
+                    div.row
+                        div.col.m6.s12.center
+                            label Age :
+                            p.range-field
+                                div#ageRange
+                        div.col.m6.s12.center
+                            label Popularity :
+                            p.range-field
+                                div#popularityRange
+                    div.row
+                        div.col.m6.s12
+                            label Localisation :
+                            select(name='localisation')
+                                option(value='0') All localisation
+                                option(value='50') < 50km
+                                option(value='100') < 100km
+                                option(value='500') < 500km
+                        div.row.col.m6.s12
+                            div.col.s8
+                                label Order by
+                                select(name='order')
+                                    option(value='0') Default
+                                    option(value='age') Age
+                                    option(value='location') Localisation
+                                    option(value='popularity') Popularity
+                                    option(value='tags') Tags
+                            div.col.s4
+                                label &zwnj;
+                                select(name='orderDirection')
+                                    option(value='DESC') Max to min
+                                    option(value='ASC') Min to max
+
+                    div.row
+                        div.col.s12
+                            label Tags
+                            div.chips.chips-autocomplete
+                    div.row
+                        div.col.s12
+                            button(type='submit').col.s12.btn.waves-effect.waves-light FILTER
+
+    div.row#profile
+        for match in matchs || []
+            a(href="/profile/" + match.id).col.s12.m6.l4.xl3.white-text
+                div.card.light-blue.lighten-2.my-card-image
+                    - var age = new Date().getFullYear() - new Date(match.profile.birthday).getFullYear();
+                    div.card-content(style="background-image: url(images_upload/" + match.profile.profileImage +");")
+                    div.card-action.row
+                        div.col.s12 #{match.profile.firstname} #{match.profile.lastname}, #{age}yo
+
+block scripts
+    script.
+        var tags = !{JSON.stringify(tags)}
+        var userTags = !{JSON.stringify(userTags)}
+    script(type='text/javascript' src='/js/nouislider.min.js')
+    script(type='text/javascript' src='/js/wNumb.js')
+    script(type='text/javascript' src='/js/match.js')

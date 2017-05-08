@@ -1,6 +1,6 @@
 "use strict";
 const mysql = require('mysql');
-const db = require('../config/db');
+const db = require('../middlewares/db');
 const Promise = require('bluebird');
 
 class Tag

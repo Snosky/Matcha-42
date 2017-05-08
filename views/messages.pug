@@ -1,0 +1,36 @@
+extends partials/layout_logged
+
+block styles
+    link(rel='stylesheet' href='/css/chat.css')
+
+block content
+    div.row.chatContainer
+        div.col.m3.s4
+            ul.collection.with-header#rooms
+                li.collection-header: h4.flow-text Friends
+                for friend in friends
+                    - friend = friend.user1.id ? friend.user1 : friend.user2
+                    li(chat_id=friend.id).collection-item.avatar
+                        if unread[friend.id]
+                            span.new.badge= unread[friend.id]
+                        else
+                            span.badge
+                        img(src='/images_upload/' + friend.profile.profileImage).circle
+                        span.title #{friend.profile.firstname} #{friend.profile.lastname}
+                        - var age = new Date().getFullYear() - friend.profile.birthday.split('-')[0];
+                        p.title #{age}yo - #{friend.profile.sex}
+
+        div.div.col.m9.s8.collection#waiting: h4.grey-text Select a friend to talk to.
+
+        div.col.m9.s8.collection#chat
+            div.col.s12#chatBox
+                div#chatBoxContent
+            div.row#form
+                form
+                    div.input-field.col.s12
+                        textarea(placeholder='Type your message here.', name='message').materialize-textarea
+                    button.btn Send
+                        i.material-icons.right send
+
+block scripts
+    script(type='text/javascript' src='/js/chat.js')

@@ -1,0 +1,12 @@
+#form { margin-bottom: 0; }
+#form textarea { margin-bottom: 0; border: none; }
+#form form button { width: 100% !important; border-radius: 0 0 2px 2px; margin-top: -6px; }
+
+.chatContainer div.col.m9.s8.collection { padding-right: 0 !important; }
+#chatBox { padding: 0; margin: 0; max-height: 80vh; overflow-y: auto; overflow-x: hidden; height: 70vh; padding-top: 20px; }
+.message-right { margin-right: 0.75rem }
+#chat .message { display: inline-block; padding: 5px 10px; border-radius: 2px; white-space: pre-line; text-align: left; }
+#chat textarea { border-top: 1px solid #e0e0e0; }
+
+#chat .message time.timeago { display: block; padding: 0; margin: 0; font-size: 10px; text-align: left; }
+#chat .message.message-right time.timeago { text-align: right;}

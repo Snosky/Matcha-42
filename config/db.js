@@ -1,10 +1,6 @@
-const mysql = require('mysql');
-const db = mysql.createConnection({
+module.exports = {
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'matcha',
-    multipleStatements: true
-});
-
-module.exports = db;
+    database: 'matcha'
+};

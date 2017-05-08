@@ -4,21 +4,48 @@ block styles
     link(rel='stylesheet' href='/css/public_profile.css')
 
 block content
+    h4
     div.row
         div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#profile
             div.row
                 div.col.s3.center
-                    - var profileImage = profileUser.getMeta('profile-image', true);
-                    div(style='background-image: url(/images_upload/' + profileImage.value +');').profile-image
+                    div(style='background-image: url(/images_upload/' + profileUser.profile.profileImage +');').profile-image
+                    p.left-align Popularity score : #{profileUser.profile.popularity}
+                    p.left-align Last connection :
+                        time.timeago(datetime=profileUser.profile.lastConnection)
                 div.col.s9
-                    - var firstname = profileUser.getMeta('firstname', true).value;
-                    - var lastname = profileUser.getMeta('lastname', true).value;
-                    - var sex = profileUser.getMeta('sex', true).value;
-                    - var orientation = profileUser.getMeta('orientation', true).value;
+                    - var age = new Date().getFullYear() - profileUser.profile.birthday.split('-')[0];
                     - var orAff = {bi: 'everyone', man: 'men', woman: 'women'}
-                    - var age = new Date().getFullYear() - profileUser.getMeta('birthday', true).value.split('-')[0];
-                    h3 #{firstname} #{lastname}
-                    h5 #{age}yo | I'm a #{sex} and I love #{orAff[orientation]}
-                    - var bio = profileUser.getMeta('bio');
-                    if bio
-                        p= bio.value
+                    h6.right-align: a(href='/report/' + profileUser.id) Report user
+                    h3 #{profileUser.profile.firstname} #{profileUser.profile.lastname}
+                    div#friendButton
+                        if (profileUser.id !== user.id && profileUser.profile.images.length > 0 && user.profile.images.length > 0)
+                            a.btn.waves-effect.waves-light.pink#friend-request
+                                i.material-icons.left add
+                                | Send a friend request
+                            a.btn.waves-effect.waves-light.red.darken-1#block
+                                i.material-icons.left block
+                                | Block user
+                        if (profileUser.id !== user.id && user.profile.images.length === 0)
+                            p Upload images if you want to add friends.
+                    h5 #{age}yo | I'm a #{profileUser.profile.sex} and I love #{orAff[profileUser.profile.orientation]}
+                    if profileUser.profile.bio
+                        p.bio= profileUser.profile.bio
+
+            div.row
+            each imageUri in profileUser.profile.images || []
+                if (imageUri !== profileUser.profile.profileImage)
+                    div.col.s3
+                        div.card.light-blue.lighten-2.my-card-image
+                            div.card-content(style="background-image: url(/images_upload/" + imageUri + ");")
+
+            div.row
+                div.col.s12
+                each tag in profileTags
+                    div.chip= tag.value
+//- TODO : Last connexion date
+
+block scripts
+    script.
+        var profileUser = !{JSON.stringify(profileUser)};
+    script(type='text/javascript' src='/js/public_profile.js')

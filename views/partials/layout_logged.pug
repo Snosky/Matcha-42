@@ -10,18 +10,28 @@ block main_layout
             a(href='/profile') My Profile
                 i.material-icons perm_identity
         li
-            a(href='logout') Logout
+            a(href='/logout') Logout
                 i.material-icons power_settings_new
+
+    ul#notifications-dropdown.dropdown-content
+        li.nothing No new notification
+        li.view-all
+            a(href='/notifications') View all notifications
+
+    ul#friends-dropdown.dropdown-content
+        li.nothing No friend request
 
     nav(role='navigation').light-blue.lighten-1
         div.nav-wrapper.container
             a(href='/')#logo-container.brand-logo Matcha
             ul.right.hide-on-med-and-down
+                li: a(href='/messages').valign-wrapper#messages-title: i.material-icons chat_bubble_outline
+                li: a(href='#!' data-activates='friends-dropdown').dropdown-button.valign-wrapper#friends-title: i.material-icons people_outline
+                li: a(href='#!' data-activates='notifications-dropdown').dropdown-button.valign-wrapper#notifications-title: i.material-icons notifications_none
                 li
-                    a(href='#!' data-activates="user-dropdown").dropdown-button.valign-wrapper
-                        if (profileImage = user.getMeta('profile-image'))
-                            div.profile-image(style='background-image: url(/images_upload/' + profileImage.value + ')')
-                        =user.getMeta('firstname').value + ' ' + user.getMeta('lastname').value
+                    a(href='#!' data-activates="user-dropdown").dropdown-button.valign-wrapper#user-title
+                        div.profile-image(style='background-image: url(/images_upload/' + user.profile.profileImage + ')')
+                        =user.profile.firstname + ' ' + user.profile.lastname
                         i.material-icons.right arrow_drop_down
 
     div.container
@@ -30,9 +40,12 @@ block main_layout
         block content
 
 block main_scripts
+    script(type='text/javascript' src='/js/jquery.timeago.js')
     script(type='text/javascript' src='/socket.io/socket.io.js')
+    script(type='text/javascript' src='/js/pug.js')
     script.
         var socket = io.connect();
+        var user = !{JSON.stringify(user)};
     script(type='text/javascript' src='/js/logged.js')
     block scripts
 

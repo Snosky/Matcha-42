@@ -58,11 +58,11 @@ userConnection.use((email, password, done) => {
 
 userConnection.ifConnected((user, done) => {
     user = User.fromJSON(user);
-    user.getMetas((err, result) => {
-         if (err)
-             return done(err);
-         return done(null, user);
-    });
+    user.getProfile((err) => {
+        if (err)
+            return done(err);
+        return done(null, user);
+    })
 });
 
 const routes = require('./routes');
@@ -74,3 +74,7 @@ module.exports = app;
 // https://material.uplabs.com/
 // http://clover.studio/2016/07/02/socket-io-best-practices/
 // http://www.mysqltutorial.org/mysql-str_to_date/
+
+// TODO : Edit position dasn profile
+// TODO : Inclure popularity dans le score match
+

@@ -1,14 +1,17 @@
 "use strict";
 const bcrypt = require('bcrypt');
-const db = require('../config/db');
+const db = require('../middlewares/db');
 const Promise = require('bluebird');
 
-const UserMeta = require('./userMeta');
-const Tag = require('./tag');
+const UserProfile = require('./userProfile');
 
 class User
 {
-    constructor () { this.data = { metas: [] }; return this; }
+    constructor () {
+        this.data = { };
+        this.userprofile = new UserProfile();
+        this.profile.userId = this.id;
+        return this; }
 
     /* Getters */
     get id() { return this.data.id; }
@@ -16,6 +19,7 @@ class User
     get password() { return this.data.password; }
     get token () { return this.data.token; }
     get metas () { return this.data.metas; }
+    get profile() { return this.userprofile; }
 
     /* Setters */
     set id(id) { this.data.id = id; }
@@ -23,18 +27,6 @@ class User
     set password(password) { this.data.password = password; }
     set token(token) { this.data.token = token; }
     set metas(metas) { this.data.metas = metas; }
-
-    getMeta(name, empty) {
-        empty = empty || false;
-
-        let ret = this.metas.find((meta) => {
-            return meta.name === name;
-        });
-        if (empty && ret === undefined)
-            return {};
-
-        return ret;
-    }
 
     /* Method */
      hydrate(data)
@@ -73,7 +65,7 @@ class User
     generateToken(done) {
         bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(this.email, salt, (err, token) => {
-                this.token = token;
+                this.token = token.replace('/', '');
                 this.save((err, user) => {
                     if (err)
                         return done(err);
@@ -83,37 +75,119 @@ class User
         });
     }
 
-    getMetas(done) {
-        UserMeta.getUserMetas(this.id, (err, result) => {
+    saveProfile(done) {
+         this.profile.userId = this.id;
+         this.profile.save(done);
+    }
+
+    getProfile(done) {
+         this.profile.userId = this.id;
+         this.profile.get(done);
+    }
+
+    getMatch(options, done) {
+        const mysql = require('mysql');
+
+        const lat = mysql.escape(this.profile.geoLatitude);
+        const long = mysql.escape(this.profile.geoLongitude);
+
+        let req = `
+            SELECT
+                user.usr_id,
+                (6371 * ACOS(COS(RADIANS(profile.geoLatitude)) * COS(RADIANS(${lat})) * COS(RADIANS(${long}) - RADIANS(profile.geoLongitude)) + SIN(RADIANS(profile.geoLatitude)) * SIN(RADIANS(${lat})))) AS distance,
+                DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(profile.birthday, '%Y') age,
+                COUNT(tags.tag_id) tagCount,
+                MatchScore(
+                    (6371 * ACOS(COS(RADIANS(profile.geoLatitude)) * COS(RADIANS(${lat})) * COS(RADIANS(${long}) - RADIANS(profile.geoLongitude)) + SIN(RADIANS(profile.geoLatitude)) * SIN(RADIANS(${lat})))),
+                    COUNT(tags.tag_id),
+                    DATE_FORMAT(profile.birthday, '%Y') - DATE_FORMAT(${mysql.escape(this.profile.birthday)}, '%Y')
+                ) AS score
+            FROM t_user user
+            LEFT JOIN t_user_profile profile ON profile.usr_id=user.usr_id
+            LEFT JOIN t_user_has_t_tag tags ON tags.usr_id=user.usr_id`;
+
+        if (options && options.tags !== '')
+            req += ' AND tags.tag_id IN (' + options.tags + ')';
+        else if (!options)
+            req += ` AND tags.tag_id IN (SELECT tag_id FROM t_user_has_t_tag WHERE usr_id=${mysql.escape(this.id)})`;
+
+        req += ` WHERE
+                user.usr_id!=?
+                AND user.usr_id NOT IN (SELECT usr_id_1 FROM t_friend WHERE status=2 AND usr_id_2=${mysql.escape(this.id)})
+                AND user.usr_id NOT IN (SELECT usr_id_2 FROM t_friend WHERE status=2 AND usr_id_1=${mysql.escape(this.id)})
+                AND profile.sex IN (?)
+                AND profile.orientation IN (?)`;
+
+        if (options)
+            req += ' AND profile.popularity >= ' + mysql.escape(options.minPopularity) + ' AND profile.popularity <= ' + mysql.escape(options.maxPopularity);
+
+        req += ' GROUP BY tags.usr_id';
+        if (options)
+            req += ` HAVING 
+                        age >= ${mysql.escape(options.minAge)}
+                        AND age <= ${mysql.escape(options.maxAge)}`;
+        if (options && options.maxLocation !== '0')
+            req += `AND distance <= ${mysql.escape(options.maxLocation)}`;
+
+        req += ' ORDER BY ';
+
+        let direction = 'DESC';
+        if (options && options.orderDirection)
+            direction = options.orderDirection === 'ASC' ? ' ASC' : ' DESC';
+
+        if (options && options.order) {
+            switch(options.order) {
+                case 'age':
+                    req += 'age ' + direction;
+                    break;
+
+                case 'location':
+                    req += 'distance ' + direction;
+                    break;
+
+                case 'popularity':
+                    req += 'profile.popularity ' + direction;
+                    break;
+
+                case 'tags':
+                    req += 'tagCount ' + direction;
+                    break;
+
+                default:
+                    req += 'score ' + direction;
+            }
+        } else {
+            req += 'score ' + direction + ', profile.popularity ' + direction;
+        }
+
+        let matchSex = this.profile.orientation;
+        let matchOrientation = [this.profile.sex, 'bi'];
+        if (this.profile.orientation === 'bi')
+            matchSex = ['woman', 'man'];
+
+        let data = [this.id, matchSex, matchOrientation];
+
+        db.query(req, data, (err, result) => {
             if (err)
                 return done(err);
-            this.metas = result;
-            done(null, this);
-        });
-    }
-
-    saveMetas(done) {
-         UserMeta.saveMultiple(this.metas, done);
-    }
-
-    setMeta(name, value) {
-        let meta = this.getMeta(name);
-        if (meta) {
-            meta.value = value;
-        } else {
-            meta = new UserMeta();
-            meta.name = name;
-            meta.value = value;
-            meta.userId = this.id;
-            this.metas.push(meta);
-        }
-        return meta;
-    }
-
-    setMetas(metas) {
-        metas.forEach((meta) => {
-            this.setMeta(meta.name, meta.value);
-        });
+            Promise.each(result, (user, index) => {
+                result[index] = new User().hydrate(user);
+                return new Promise((resolve, reject) => {
+                    result[index].getProfile((err) => {
+                        if (err)
+                            return reject(err);
+                        result[index].profile.score = user.score;
+                        result[index].profile.distance = user.distance;
+                        result[index].profile.commonTags = user.commonTags;
+                        resolve();
+                    })
+                })
+            }).then(() => {
+                done(null, result);
+            }).catch((err) => {
+                return done(err);
+            });
+        })
     }
 
     /* == STATIC FUNCTIONS == */
@@ -157,8 +231,9 @@ class User
 
     /* JSON */
     toJSON() {
-        let {id, email, password, token, metas} = this.data;
-        return {id, email, password, token, metas};
+        let profile = this.profile.toJSON();
+        let {id, email, password, token} = this.data;
+        return {id, email, password, token, profile};
     }
 
     static fromJSON(obj) {

@@ -8,8 +8,10 @@ module.exports = (req, res, next) => {
 
     if (req.session && req.session.user && ifConnected !== undefined) {
         ifConnected(req.session.user, (err, user) => {
-            if (err)
-                return res.status(500).send('Database error omg');
+            if (err) {
+                console.log(err);
+                return res.status(500).send('Database error');
+            }
             req.session.user = user;
             req.user = user;
             res.locals.user = user;

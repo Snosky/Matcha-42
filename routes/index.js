@@ -4,8 +4,12 @@ const router = express.Router();
 const userConnection = require('../middlewares/user-connection');
 
 const user = require('./user');
+const match = require('./match');
+const notification = require('./notification');
+const message = require('./message');
+const report = require('./report');
 
-router.get('/', userConnection.logged(), (req, res) => { res.render('index') });
+router.get('/', userConnection.logged(), match.index);
 
 // Register routes
 router.route('/register')
@@ -34,9 +38,9 @@ router.route('/forget')
             user.forgetPasswordValidation,
         ], (req, res) => { res.redirect('/forget'); });
 
-router.route('/reset/:token*')
+router.route('/reset/:token')
     .get([
-            userConnection.notLogged(),
+            userConnection.notLogged('/register'),
             user.confirmToken,
         ], (req, res) => { res.render('password_reset', { token: req.user.token }) })
     .post([
@@ -77,5 +81,13 @@ router.get('/profile/images/delete/:index([0-5])', [
 router.get('/profile/:user_id([0-9]+)', [
     userConnection.logged()
     ], user.publicProfile);
+
+// Notifications
+router.get('/notifications', userConnection.logged(), notification.index);
+
+// Messages
+router.get('/messages', userConnection.logged(), message.index);
+
+router.get('/report/:id([0-9]+)', userConnection.logged(), report.index);
 
 module.exports = router;

@@ -1,0 +1,18 @@
+extends partials/layout_logged
+
+block styles
+    link(rel='stylesheet' href='/css/notifications.css')
+
+block content
+    h3.indigo-text.center.text-accent-4 Notifications
+
+    ul.collection
+        for notif in notifs
+            li.collection-item(class=notif.status ? '' : 'unread')
+                if (notif.type === 'PROFILE_VIEW')
+                    a(href='/profile/' + notif.emitter.id) #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
+                    |  has visited your profile.
+                    time(datetime=notif.time).date.timeago.grey-text
+
+block scripts
+    script(type='text/javascript' src='/js/notifications-page.js')

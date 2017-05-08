@@ -8,6 +8,7 @@ html
         title Matcha
 
         link(rel='stylesheet' href='http://fonts.googleapis.com/icon?family=Material+Icons')
+        link(rel='stylesheet' href='/css/nouislider.css')
         link(rel='stylesheet' href='/materialize/css/materialize.min.css' media='screen,projection')
         link(rel='stylesheet' href='/css/global.css')
         block main_styles
@@ -18,8 +19,8 @@ html
         script(type='text/javascript' src='/materialize/js/materialize.min.js')
         script(type='text/javascript' src='/js/validateForm.js')
         script.
-            var formInputs = !{JSON.stringify(locals.formInputs)};
-            var formErrors = !{JSON.stringify(locals.formErrors)};
+            var formInputs = !{JSON.stringify(locals.formInputs || [])};
+            var formErrors = !{JSON.stringify(locals.formErrors || [])};
             if (formInputs && formErrors)
                 validateForm(formInputs, formErrors);
         block main_scripts

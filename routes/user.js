@@ -4,7 +4,6 @@ const fs = require('fs');
 const email = require('../middlewares/mail');
 
 const User = require('../models/user');
-const UserMeta = require('../models/userMeta');
 const Tag = require('../models/tag');
 
 /**
@@ -46,21 +45,18 @@ module.exports.registerValidation = (req, res, next) => {
                             return res.status(500).send('Database error');
                         }
 
-                        user.setMetas([
-                            { name: 'sex', value: req.body.sex },
-                            { name: 'orientation', value: req.body.orientation },
-                            { name: 'firstname', value: req.body.firstname },
-                            { name: 'lastname', value: req.body.lastname },
-                            { name: 'birthday', value: req.body.birthday },
-                            { name: 'bio', value: null },
-                        ]);
+                        user.profile.sex = req.body.sex;
+                        user.profile.orientation = req.body.orientation;
+                        user.profile.firstname = req.body.firstname;
+                        user.profile.lastname = req.body.lastname;
+                        user.profile.birthday = req.body.birthday;
+                        user.profile.bio = null;
 
-                        user.saveMetas((err, result) => {
+                        user.saveProfile((err, result) => {
                             if (err) {
-                                console.log(err);
+                                console.log('profile', err);
                                 return res.status(500).send('Database error');
                             }
-
                             return res.redirect('/login');
                         });
                     });
@@ -154,7 +150,7 @@ module.exports.forgetPasswordValidation = (req, res, next) => {
 };
 
 /**
- * Confirm user with tokne exist
+ * Confirm user with token exist
  * @param req
  * @param res
  * @param next
@@ -305,22 +301,20 @@ module.exports.profilePublicValidation = (req, res, next) => {
             if (valid === false)
                 return next();
 
-            req.user.setMetas([
-                { name: 'sex', value: req.body.sex },
-                { name: 'orientation', value: req.body.orientation },
-                { name: 'firstname', value: req.body.firstname },
-                { name: 'lastname', value: req.body.lastname },
-                { name: 'bio', value: req.body.bio || req.user.metas.bio }
-                //{ name: 'images', value: ['img1', 'img2', 'img3', 'img4', 'img5']}
-            ]);
+            req.user.profile.sex = req.body.sex;
+            req.user.profile.orientation = req.body.orientation;
+            req.user.profile.firstname = req.body.firstname;
+            req.user.profile.lastname = req.body.lastname;
+            req.user.profile.bio = req.body.bio || req.user.profile.bio;
 
-            req.user.saveMetas((err, result) => {
+            req.user.saveProfile((err) => {
                 if (err) {
-                    console.log(err);
+                    console.error(err);
                     return res.status(500).send('Database error');
                 }
                 req.flash('success', 'Public profile updated.');
                 return next();
+
             });
         }
     );
@@ -335,8 +329,8 @@ module.exports.profilePublicValidation = (req, res, next) => {
 module.exports.picsValidation = (req, res, next) => {
 
     const upload = require('../middlewares/upload-images');
-    let userImages = req.user.getMeta('images');
-    userImages = userImages ? userImages.value : [];
+    let userImages = req.user.profile.images;
+    userImages = userImages || [];
 
     upload.array('images', 5 - userImages.length)(req, res, (err) => {
         if (err) {
@@ -353,15 +347,15 @@ module.exports.picsValidation = (req, res, next) => {
             userImages.push(file.filename);
         });
 
-        req.user.setMeta('images', userImages);
-        req.user.saveMetas((err, result) => {
+        req.user.profile.images = userImages;
+        req.user.saveProfile((err) => {
             if (err) {
                 req.files.forEach((file) => {
                     fs.unlink(file.path);
                 });
-                res.status(500).send('Database error');
+                console.error(err);
+                return res.status(500).send('Database error');
             }
-
             req.flash('success', 'Images added.');
             next();
         });
@@ -376,18 +370,18 @@ module.exports.picsValidation = (req, res, next) => {
  */
 module.exports.setProfilPic = (req, res, next) => {
 
-    let userImages = req.user.getMeta('images');
+    let userImages = req.user.profile.images;
 
-    if (userImages && userImages.value[req.params.index]) {
-        req.user.setMeta('profile-image', userImages.value[req.params.index]);
-        req.user.saveMetas((err, result) => {
+    if (userImages && userImages[req.params.index]) {
+        req.user.profile.profileImage = userImages[req.params.index];
+        req.user.saveProfile((err) => {
             if (err) {
-                console.log(err);
+                console.err(err);
                 return res.status(500).send('Database error');
             }
             req.flash('success', 'Profile pic set.');
             next();
-        });
+        })
     }
 };
 
@@ -399,24 +393,24 @@ module.exports.setProfilPic = (req, res, next) => {
  * @returns {*}
  */
 module.exports.deletePic = (req, res, next) => {
-    let userImages = req.user.getMeta('images');
+    let userImages = req.user.profile.images;
 
-    if (userImages && userImages.value[req.params.index]) {
-        fs.unlink('public/images_upload/' + userImages.value[req.params.index], (err) => {
-            if (err)
-                console.error(err);
-        });
-        userImages.value.splice(req.params.index, 1);
+    if (userImages && userImages[req.params.index]) {
+        if (userImages[req.params.index].includes('demo') === false) // Delete if not demo images
+            fs.unlink('public/images_upload/' + userImages[req.params.index], (err) => {
+                if (err)
+                    console.error(err);
+            });
+        userImages.splice(req.params.index, 1);
 
-        req.user.saveMetas((err, result) => {
+        req.user.saveProfile((err) => {
             if (err) {
                 console.error(err);
                 return res.status(500).send('Database error');
             }
-
             req.flash('success', 'Image deleted.');
             return next();
-        })
+        });
     } else {
         req.flash('error', 'Image not found.');
         return next();
@@ -433,15 +427,23 @@ module.exports.publicProfile = (req, res) => {
         if (user === false)
             return res.status(404).send('User not found');
 
-        user.getMetas((err, user) => {
+        user.getProfile((err) => {
             if (err) {
                 console.error(err);
                 return res.status(500).send('Database error');
             }
 
-            res.render('public_profile', {
-                profileUser: user
-            })
+            Tag.getByUser(user.id, (err, tags) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).send('Database error');
+                }
+
+                res.render('public_profile', {
+                    profileUser: user,
+                    profileTags: tags
+                })
+            });
         })
     })
 };
@@ -507,15 +509,16 @@ module.exports.socket = (io, client) => {
      * @param geo
      */
     const geoUpdate = (geo) => {
-        let geoTime = client.user.getMeta('geo-timestamp');
+        let geoTime = client.user.profile.geoTimestamp.getTime();
         let timestamp = new Date().getTime();
 
-        if (!geoTime || timestamp - geoTime.value > 86400000) // If more than a day, update
+        if (!geoTime || timestamp - geoTime > 86400000) // If more than a day, update
         {
-            client.user.setMeta('geo-timestamp', timestamp);
-            client.user.setMeta('geo-long', geo.longitude);
-            client.user.setMeta('geo-lat', geo.latitude);
-            client.user.saveMetas((err, result) => {
+            client.user.profile.geoTimestamp = new Date(timestamp);
+            client.user.profile.geoLongitude = geo.longitude;
+            client.user.profile.geoLatitude = geo.latitude;
+
+            client.user.saveProfile((err) => {
                 if (err) {
                     console.error(err);
                     return false;

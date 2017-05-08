@@ -1,8 +1,8 @@
 const http = require('http');
 const app = require('../index');
-const mysql = require('../config/db.js');
+const db = require('../middlewares/db.js');
 
-mysql.connect((err) => {
+db.connect((err) => {
     if (err)
         throw err;
 

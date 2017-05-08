@@ -44,37 +44,37 @@ block content
                 div.row
                     div.input-field.col.m6.s12
                         select(name='sex' required)
-                            - var sex = user.getMeta('sex').value;
+                            - var sex = user.profile.sex
                             option(value='woman' selected=sex == 'woman') I am a woman
                             option(value='man' selected=sex == 'man') I am a man
                     div.input-field.col.m6.s12
                         select(name='orientation' required)
-                            - var orientation = user.getMeta('orientation').value
+                            - var orientation = user.profile.orientation
                             option(value='man' selected=orientation == 'man') who love mans
                             option(value='woman' selected=orientation == 'woman') who love womans
                             option(value='bi' selected=orientation == 'bi') who love everyone
                 div.row
                     div.input-field.col.m6.s12
-                        input(type='text' name='firstname' required value=user.getMeta('firstname').value).validate
+                        input(type='text' name='firstname' required value=user.profile.firstname).validate
                         label My first name is
                     div.input-field.col.m6.s12
-                        input(type='text' name='lastname' required value=user.getMeta('lastname').value).validate
+                        input(type='text' name='lastname' required value=user.profile.lastname).validate
                         label and my last name is
                 div.row
                     div.input-field.col.s12
-                        input(type='text' readonly value=user.getMeta('birthday').value)
+                        input(type='text' readonly value=user.profile.birthday)
                         label i am born the
                 div.row
                     div.input-field.col.s12
-                        textarea(name='bio')#bio.materialize-textarea= user.getMeta('bio').value
+                        textarea(name='bio')#bio.materialize-textarea= user.profile.bio
                         label(for='bio') My Bio
                 div.row
                     div.col.s12.center
                         button(type='submit').col.s12.btn.waves-effect.waves-light.btn-large UPDATE
 
         div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#pics
-            - var images = user.getMeta('images');
-            - var count = 5 - (images ? images.value.length : 0);
+            - var images = user.profile.images;
+            - var count = 5 - (images ? images.length : 0);
             div.row
                 p.col.s12.grey-text.flow-text
                     if count
@@ -82,10 +82,10 @@ block content
                     else
                         | You can no longer add images, delete some if you want to add new ones
             div.row
-            each imageUri, index in images ? images.value : []
+            each imageUri, index in  images || []
                 div.col.s3
                     div.card.light-blue.lighten-2.my-card-image
-                        div.card-content(style="background-image: url(images_upload/" + imageUri +");")
+                        div.card-content(style="background-image: url(/images_upload/" + imageUri +");")
                         div.card-action.row
                             div.col.s6.center
                                 if profileImage && profileImage.value === imageUri
@@ -106,7 +106,7 @@ block content
                                     span ADD IMAGES
                                     input(type='file' name='images' multiple accept='image/*')
                                 div.file-path-wrapper
-                                    - var max = 5 - (images ? images.value.length : 0)
+                                    - var max = 5 - (images ? images.length : 0)
                                     input(type='text' placeholder='Upload one or more images (max ' + max + ')').file-path.validate
                         div.row
                             div.col.s12.center
