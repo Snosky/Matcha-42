@@ -509,7 +509,7 @@ module.exports.socket = (io, client) => {
      * @param geo
      */
     const geoUpdate = (geo) => {
-        let geoTime = client.user.profile.geoTimestamp.getTime();
+        let geoTime = client.user.profile.geoTimestamp ? client.user.profile.geoTimestamp.getTime() : null;
         let timestamp = new Date().getTime();
 
         if (!geoTime || timestamp - geoTime > 86400000) // If more than a day, update

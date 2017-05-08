@@ -19,7 +19,7 @@ block content
                     h6.right-align: a(href='/report/' + profileUser.id) Report user
                     h3 #{profileUser.profile.firstname} #{profileUser.profile.lastname}
                     div#friendButton
-                        if (profileUser.id !== user.id && profileUser.profile.images.length > 0 && user.profile.images.length > 0)
+                        if (profileUser.id !== user.id && profileUser.profile.images && profileUser.profile.images.length > 0 && user.profile.images.length > 0)
                             a.btn.waves-effect.waves-light.pink#friend-request
                                 i.material-icons.left add
                                 | Send a friend request
