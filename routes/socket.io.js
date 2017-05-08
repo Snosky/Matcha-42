@@ -43,7 +43,7 @@ module.exports = (server, sessionMiddleware) => {
 
             client.on('disconnect', () => {
                 client.user.profile.lastConnection = new Date();
-                client.user.saveProfile((err) => {
+                client.user.profile.saveLastConnection((err) => {
                     if (err)
                         console.error(err)
                 })

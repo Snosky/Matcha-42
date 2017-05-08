@@ -45,7 +45,8 @@ class UserProfile {
     hydrate(data) {
         this.data = data;
         if (this.images)
-            this.images = JSON.parse(data.images)
+            this.images = JSON.parse(data.images);
+        return this;
     }
 
     save(done) {
@@ -73,6 +74,14 @@ class UserProfile {
                 return done(err);
             return done(null, result);
         });
+    }
+
+    saveLastConnection(done) {
+        db.query('UPDATE t_user_profile SET last_connection=? WHERE usr_id=?', [this.lastConnection, this.userId], (err, result) => {
+            if (err)
+                return done(err);
+            done(null);
+        })
     }
 
     get(done) {
