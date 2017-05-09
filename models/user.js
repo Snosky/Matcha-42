@@ -93,35 +93,36 @@ class User
 
         let req = `
             SELECT
-                user.usr_id,
+                t_user.usr_id,
                 (6371 * ACOS(COS(RADIANS(profile.geoLatitude)) * COS(RADIANS(${lat})) * COS(RADIANS(${long}) - RADIANS(profile.geoLongitude)) + SIN(RADIANS(profile.geoLatitude)) * SIN(RADIANS(${lat})))) AS distance,
                 DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(profile.birthday, '%Y') age,
-                COUNT(tags.tag_id) tagCount,
+                COUNT(DISTINCT t2.tag_id) tagCount,
                 MatchScore(
                     (6371 * ACOS(COS(RADIANS(profile.geoLatitude)) * COS(RADIANS(${lat})) * COS(RADIANS(${long}) - RADIANS(profile.geoLongitude)) + SIN(RADIANS(profile.geoLatitude)) * SIN(RADIANS(${lat})))),
-                    COUNT(tags.tag_id),
+                    COUNT(DISTINCT t2.tag_id),
                     DATE_FORMAT(profile.birthday, '%Y') - DATE_FORMAT(${mysql.escape(this.profile.birthday)}, '%Y')
                 ) AS score
-            FROM t_user user
-            LEFT JOIN t_user_profile profile ON profile.usr_id=user.usr_id
-            LEFT JOIN t_user_has_t_tag tags ON tags.usr_id=user.usr_id`;
+            FROM t_user
+            LEFT JOIN t_user_profile profile ON profile.usr_id=t_user.usr_id
+            LEFT JOIN t_user_has_t_tag t ON t.usr_id=t_user.usr_id
+            LEFT JOIN t_user_has_t_tag t2 ON t2.usr_id=t_user.usr_id`;
 
         if (options && options.tags !== '')
-            req += ' AND tags.tag_id IN (' + options.tags + ')';
+            req += ' AND t2.tag_id IN (' + options.tags + ')';
         else if (!options)
-            req += ` AND tags.tag_id IN (SELECT tag_id FROM t_user_has_t_tag WHERE usr_id=${mysql.escape(this.id)})`;
+            req += ` AND t2.tag_id IN (SELECT tag_id FROM t_user_has_t_tag WHERE usr_id=${mysql.escape(this.id)})`;
 
         req += ` WHERE
-                user.usr_id!=?
-                AND user.usr_id NOT IN (SELECT usr_id_1 FROM t_friend WHERE status=2 AND usr_id_2=${mysql.escape(this.id)})
-                AND user.usr_id NOT IN (SELECT usr_id_2 FROM t_friend WHERE status=2 AND usr_id_1=${mysql.escape(this.id)})
+                t_user.usr_id!=?
+                AND t_user.usr_id NOT IN (SELECT usr_id_1 FROM t_friend WHERE status=2 AND usr_id_2=${mysql.escape(this.id)})
+                AND t_user.usr_id NOT IN (SELECT usr_id_2 FROM t_friend WHERE status=2 AND usr_id_1=${mysql.escape(this.id)})
                 AND profile.sex IN (?)
                 AND profile.orientation IN (?)`;
 
         if (options)
             req += ' AND profile.popularity >= ' + mysql.escape(options.minPopularity) + ' AND profile.popularity <= ' + mysql.escape(options.maxPopularity);
 
-        req += ' GROUP BY tags.usr_id';
+        req += ' GROUP BY t.usr_id, t2.usr_id';
         if (options)
             req += ` HAVING 
                         age >= ${mysql.escape(options.minAge)}
