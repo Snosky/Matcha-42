@@ -17,6 +17,7 @@ html
 
         script(type='text/javascript' src='/js/jquery-3.2.1.min.js')
         script(type='text/javascript' src='/materialize/js/materialize.min.js')
+        script(type='text/javascript' src='/js/global.js')
         script(type='text/javascript' src='/js/validateForm.js')
         script.
             var formInputs = !{JSON.stringify(locals.formInputs || [])};
@@ -24,4 +25,3 @@ html
             if (formInputs && formErrors)
                 validateForm(formInputs, formErrors);
         block main_scripts
-        script(type='text/javascript' src='/js/global.js')

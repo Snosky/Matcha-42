@@ -5,7 +5,12 @@ function validateForm(values, errors) {
     // Assign values
     $.each(values, (name, value) => {
         input = $(`[name=${name}]`);
-        if (input && input.attr('type') !== 'password')
+        if (input && input.attr('type') === 'date') {
+            $input = input.pickadate(pickers[name]);
+            let picker = $input.pickadate('picker');
+            picker.set('select', new Date(value));
+        }
+        else if (input && input.attr('type') !== 'password')
             input.val(value);
     });
 

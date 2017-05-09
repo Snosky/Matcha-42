@@ -77,4 +77,4 @@ module.exports = app;
 
 // TODO : Edit position dasn profile
 // TODO : Inclure popularity dans le score match
-
+// TODO : Bug birthday quand fail inscription

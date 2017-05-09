@@ -62,7 +62,10 @@ block content
                         label and my last name is
                 div.row
                     div.input-field.col.s12
-                        input(type='text' readonly value=user.profile.birthday)
+                        - var date = new Date(user.profile.birthday)
+                        - var month = ["January", "February", "March","April", "May", "June", "July","August", "September", "October","November", "December"];
+                        - var dateText = date.getDate() + ' ' + month[date.getMonth()] + ', ' + date.getFullYear()
+                        input(type='text' readonly value=dateText)
                         label i am born the
                 div.row
                     div.input-field.col.s12
