@@ -11,14 +11,15 @@ block content
                 for friend in friends
                     - friend = friend.user1.id ? friend.user1 : friend.user2
                     li(chat_id=friend.id).collection-item.avatar
-                        if unread[friend.id]
-                            span.new.badge= unread[friend.id]
-                        else
-                            span.badge
                         img(src='/images_upload/' + friend.profile.profileImage).circle
-                        span.title #{friend.profile.firstname} #{friend.profile.lastname}
+                        span.title.hide-on-small-only #{friend.profile.firstname} #{friend.profile.lastname}
                         - var age = new Date().getFullYear() - friend.profile.birthday.split('-')[0];
-                        p.title #{age}yo - #{friend.profile.sex}
+                        p.hide-on-small-only.title #{age}yo - #{friend.profile.sex}
+                        div.secondary-content
+                            if unread[friend.id]
+                                span.new.badge= unread[friend.id]
+                            else
+                                span.badge
 
         div.div.col.m9.s8.collection#waiting: h4.grey-text Select a friend to talk to.
 

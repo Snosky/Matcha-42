@@ -28,6 +28,14 @@ const blockTemplate =
 
 const isBlockedTemplate = '';
 
+const friendRequestTemplate =
+`a.btn.waves-effect.waves-light.green#accept
+    i.material-icons.left check
+    | Accept friend request
+a.btn.waves-effect.waves-light.red#ignore
+    i.material-icons.left close
+    | Ignore friend request`;
+
 
 /* END TEMPLATES */
 
@@ -96,14 +104,7 @@ socket.on('friend.isfriend', (friend) => {
 
 socket.on('friend.request.new', (friend) => {
     if (friend.user1.id === profileUser.id) {
-        let buttons =
-`a.btn.waves-effect.waves-light.green#accept
-    i.material-icons.left check
-    | Accept friend request
-a.btn.waves-effect.waves-light.red#ignore
-    i.material-icons.left close
-    | Ignore friend request`;
-        $('#friendButton').html(pug.render(buttons));
+        $('#friendButton').html(pug.render(friendRequestTemplate));
     }
 });
 

@@ -92,12 +92,12 @@ block content
                         | You can no longer add images, delete some if you want to add new ones
             div.row
             each imageUri, index in  images || []
-                div.col.s3
+                div.col.l3.m6.s12
                     div.card.light-blue.lighten-2.my-card-image
                         div.card-content(style="background-image: url(/images_upload/" + imageUri +");")
                         div.card-action.row
                             div.col.s6.center
-                                if profileImage && profileImage.value === imageUri
+                                if user.profile.profileImage === imageUri
                                     a(data-position="top" data-delay="50" data-tooltip="Unset profile pic").btn-floating.waves-effect.waves-light.light-green.lighten-1.tooltipped
                                         i.material-icons done_all
                                 else

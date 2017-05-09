@@ -110,6 +110,39 @@ class Friend {
         })
     }
 
+    static getAllFriends(userId, done) {
+        db.query('SELECT * FROM t_friend WHERE (usr_id_1=? OR usr_id_2=?) AND status=0 OR status=1 ORDER BY status ASC', [userId, userId], (err, result) => {
+            if (err)
+                return done(err);
+            Promise.each(result, (friend, index) => {
+                result[index] = new Friend().hydrate(friend);
+                if (result[index].user1 === userId) {
+                    result[index].user1 = result[index].user2;
+                    result[index].user2 = userId;
+                }
+                return new Promise((resolve, reject) => {
+                    User.findById(result[index].user1, (err, user) => {
+                        if (err)
+                            return reject(err);
+
+                        user.password = undefined;
+                        user.token = undefined;
+                        user.getProfile((err) => {
+                            if (err)
+                                return reject(err);
+                            result[index].user1 = user;
+                            resolve();
+                        })
+                    });
+                })
+            }).then(() => {
+                return done(null, result);
+            }).catch((err) => {
+                return done(err);
+            })
+        })
+    }
+
     /* JSON */
     toJSON() {
         let {user1, user2, userAction, status} = this;

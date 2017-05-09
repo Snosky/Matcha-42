@@ -26,3 +26,6 @@ div.profile-image { display: block; width: 50px; height: 50px; background-color:
     #friends-dropdown > li p { margin: 0; padding: 0; text-align: center; }
         #friends-dropdown > li p a { color: #26a69a; }
         #friends-dropdown > li p a:first-child { margin-right: 10px; }
+
+ul.side-nav li.header-nav a { text-align: center; text-decoration: underline }
+    ul.side-nav li.header-nav img { float: left; height: 48px; }

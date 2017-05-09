@@ -2,6 +2,10 @@ const Friend = require('../models/friend');
 const Notification = require('../models/notification');
 const User = require('../models/user');
 
+module.exports.index = (req, res) => {
+    res.render('friends');
+};
+
 module.exports.socket = (io, client) => {
     const friendRequest = (data) => {
         const room = 'user.' + data.target;

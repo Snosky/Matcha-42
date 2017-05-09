@@ -12,7 +12,16 @@ block content
                 if (notif.type === 'PROFILE_VIEW')
                     a(href='/profile/' + notif.emitter.id) #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
                     |  has visited your profile.
-                    time(datetime=notif.time).date.timeago.grey-text
+                else if (notif.type === 'FRIEND_ACCEPT')
+                    a(href="/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
+                    |  accepted your friend request.
+                else if (notif.type === 'FRIEND_IGNORE')
+                    a(href = "/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
+                    |  refused your friend request.
+                else if (notif.type === 'FRIEND_REMOVE')
+                    a(href="/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
+                    |  removed you from his friends list.
+                time(datetime=notif.time).date.timeago.grey-text
 
 block scripts
     script(type='text/javascript' src='/js/notifications-page.js')

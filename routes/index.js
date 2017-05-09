@@ -8,6 +8,7 @@ const match = require('./match');
 const notification = require('./notification');
 const message = require('./message');
 const report = require('./report');
+const friend = require('./friend');
 
 router.get('/', userConnection.logged(), match.index);
 
@@ -89,5 +90,7 @@ router.get('/notifications', userConnection.logged(), notification.index);
 router.get('/messages', userConnection.logged(), message.index);
 
 router.get('/report/:id([0-9]+)', userConnection.logged(), report.index);
+
+router.get('/friends', userConnection.logged(), friend.index);
 
 module.exports = router;

@@ -20,10 +20,14 @@ block main_layout
 
     ul#friends-dropdown.dropdown-content
         li.nothing No friend request
+        li.view-all
+            a(href='/friends') View all friends
 
     nav(role='navigation').light-blue.lighten-1
         div.nav-wrapper.container
             a(href='/')#logo-container.brand-logo Matcha
+            a(href="#" data-activates="mobile-nav").button-collapse
+                i.material-icons menu
             ul.right.hide-on-med-and-down
                 li: a(href='/messages').valign-wrapper#messages-title: i.material-icons chat_bubble_outline
                 li: a(href='#!' data-activates='friends-dropdown').dropdown-button.valign-wrapper#friends-title: i.material-icons people_outline
@@ -33,6 +37,28 @@ block main_layout
                         div.profile-image(style='background-image: url(/images_upload/' + user.profile.profileImage + ')')
                         =user.profile.firstname + ' ' + user.profile.lastname
                         i.material-icons.right arrow_drop_down
+            ul.side-nav#mobile-nav
+                li.header-nav
+                    a(href='/') #{user.profile.firstname} #{user.profile.lastname}
+                        img(src='/images_upload/' + user.profile.profileImage).responsive-img.circle
+                li
+                    a(href='/profile') My Profile
+                        i.material-icons perm_identity
+                li#messages-title-mobile
+                    a(href='/messages') Messages
+                        span.badge.right
+                        i.material-icons chat_bubble_outline
+                li#notifications-title-mobile
+                    a(href='/notifications') Notifications
+                        span.badge.right
+                        i.material-icons notifications_none
+                li#friends-title-mobile
+                    a(href='/friends') Friends
+                        span.badge.right
+                        i.material-icons people_outline
+                li
+                    a(href='/logout') Logout
+                        i.material-icons power_settings_new
 
     div.container
         main

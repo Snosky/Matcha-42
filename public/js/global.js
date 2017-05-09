@@ -9,9 +9,9 @@ let pickers = {
 };
 
 $(document).ready(function() {
-
     // Materialize initialisation
     $('select').material_select();
+    $(".button-collapse").sideNav();
     $('.tooltipped').tooltip({delay: 50});
 
     $('.datepicker-birthday').pickadate(pickers.birthday);

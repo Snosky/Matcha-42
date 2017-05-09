@@ -64,6 +64,7 @@ $(document).ready(() => {
 /* == NOTIFICATIONS == */
 const notifContainer = $('#notifications-dropdown');
 const notifTitle = $('#notifications-title');
+const notifTitleMobile = $('li#notifications-title-mobile .badge');
 let unreadNotifications = [];
 
 const addNotif = (notif) => {
@@ -110,6 +111,11 @@ const addNotif = (notif) => {
         }
         unreadNotifications.push(notif);
         $('.notifsCount', notifTitle).html( unreadNotifications.length );
+
+        // Add notif to mobile
+        if (notifTitleMobile.hasClass('new') === false)
+            notifTitleMobile.addClass('new');
+        notifTitleMobile.html(unreadNotifications.length)
     }
 };
 
@@ -134,11 +140,12 @@ notifTitle.on('click', () => {
 /* == FRIENDS == */
 const friendContainer = $('#friends-dropdown');
 const friendTitle = $('#friends-title');
+const friendTitleMobile = $('#friends-title-mobile .badge');
 let friendLen = 0;
 const addFriendsRequest = (friend) => {
     let request =
         `li(request_id=friend.user1.id)
-            a(href="/profile" + friend.user1.id) #{friend.user1.profile.firstname} #{friend.user1.profile.lastname}
+            a(href="/profile/" + friend.user1.id) #{friend.user1.profile.firstname} #{friend.user1.profile.lastname}
             |  want to be your friend.
             p
                 a(onclick="acceptFriend("+friend.user1.id+")").accept Accept
@@ -155,6 +162,14 @@ const addFriendsRequest = (friend) => {
         friendTitle.append('<span class="notifsCount">0</span>');
     }
     friendLen++;
+
+    // Add notif to mobile
+    if (friendLen) {
+        if (friendTitleMobile.hasClass('new') === false)
+            friendTitleMobile.addClass('new');
+        friendTitleMobile.html(friendLen)
+    }
+
     $('.notifsCount', friendTitle).html(friendLen);
 };
 
@@ -188,7 +203,9 @@ function removeFriendFromList(id) {
     if (friendLen === 0) {
         $('li.nothing', friendContainer).show();
         $('.material-icons', friendTitle).html('people_outline');
-        $('.notifsCount', friendTitle).remove()
+        $('.notifsCount', friendTitle).remove();
+        friendTitleMobile.removeClass('new');
+        friendTitleMobile.html('')
     } else {
         $('.notifsCount', friendTitle).html(friendLen);
     }
@@ -197,6 +214,7 @@ function removeFriendFromList(id) {
 /* == MESSAGES == */
 const messageTitle = $('#messages-title');
 const notifAudio = new Audio('/sounds/notif.mp3');
+const messageTitleMobile = $('#messages-title-mobile .badge');
 let totalUnread = 0;
 
 const updateUnreadCount = () => {
@@ -205,9 +223,15 @@ const updateUnreadCount = () => {
         if ($('.notifsCount', messageTitle).length === 0)
             messageTitle.append('<span class="notifsCount"></span>');
         $('.notifsCount', messageTitle).html(totalUnread);
+
+        if (messageTitleMobile.hasClass('new') === false)
+            messageTitleMobile.addClass('new');
+        messageTitleMobile.html(totalUnread);
     } else {
         $('.material-icons', messageTitle).html('chat_bubble_outline');
         $('.notifsCount', messageTitle).remove();
+        messageTitleMobile.removeClass('new');
+        messageTitleMobile.html('');
     }
 };
 
