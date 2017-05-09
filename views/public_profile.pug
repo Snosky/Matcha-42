@@ -19,14 +19,14 @@ block content
                     h6.right-align: a(href='/report/' + profileUser.id) Report user
                     h3 #{profileUser.profile.firstname} #{profileUser.profile.lastname}
                     div#friendButton
-                        if (profileUser.id !== user.id && profileUser.profile.images && profileUser.profile.images.length > 0 && user.profile.images.length > 0)
+                        if (profileUser.id !== user.id && profileUser.profile.images && user.profile.images && profileUser.profile.images.length > 0 && user.profile.images.length > 0)
                             a.btn.waves-effect.waves-light.pink#friend-request
                                 i.material-icons.left add
                                 | Send a friend request
                             a.btn.waves-effect.waves-light.red.darken-1#block
                                 i.material-icons.left block
                                 | Block user
-                        if (profileUser.id !== user.id && user.profile.images.length === 0)
+                        if (profileUser.id !== user.id && (!user.profile.images || user.profile.images.length === 0))
                             p Upload images if you want to add friends.
                     h5 #{age}yo | I'm a #{profileUser.profile.sex} and I love #{orAff[profileUser.profile.orientation]}
                     if profileUser.profile.bio

@@ -69,6 +69,12 @@ block content
                         label i am born the
                 div.row
                     div.input-field.col.s12
+                        input(type='text' placeholder='Enter your adress').validate#autocompleteLocation
+                        input(type='hidden' name='geoLatitude')
+                        input(type='hidden' name='geoLongitude')
+                        label Your location
+                div.row
+                    div.input-field.col.s12
                         textarea(name='bio')#bio.materialize-textarea= user.profile.bio
                         label(for='bio') My Bio
                 div.row
@@ -121,12 +127,11 @@ block content
                 div.col.s12
                     div.chips.chips-autocomplete
 
-
-
-
 block scripts
     script.
         var tags = !{JSON.stringify(tags)};
         var userTags = !{JSON.stringify(userTags)};
-    script(type='text/javascript' src='js/tags.js')
+    script(src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCkXdeT13TrHcpPaQxOqPZFzfCxpkr6h7k&libraries=places")
+    script(type='text/javascript' src='/js/tags.js')
+    script(type='text/javascript' src='/js/map.api.js')
 

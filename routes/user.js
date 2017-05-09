@@ -307,6 +307,12 @@ module.exports.profilePublicValidation = (req, res, next) => {
             req.user.profile.lastname = req.body.lastname;
             req.user.profile.bio = req.body.bio || req.user.profile.bio;
 
+            if (req.body.geoLatitude !== '' && req.body.geoLongitude !== '' && !isNaN(req.body.geoLatitude) && !isNaN(req.body.geoLongitude)) {
+                req.user.profile.geoLatitude = req.body.geoLatitude;
+                req.user.profile.geoLongitude = req.body.geoLongitude;
+                req.user.profile.geoTimestamp = new Date();
+            }
+
             req.user.saveProfile((err) => {
                 if (err) {
                     console.error(err);
