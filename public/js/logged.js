@@ -19,48 +19,6 @@ $(document).ready(() => {
     });
 });
 
-/* == GEO == */
-(() => {
-    options = {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 86400000
-    };
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(updateGeo, error, options);
-    } else {
-        $.getJSON("http://freegeoip.net/json/", function(data) {
-            updateGeo({
-                coords: {
-                    latitude: data.latitude,
-                    longitude: data.longitude
-                }
-            });
-        });
-    }
-
-    function updateGeo(position) {
-        console.log('Update geo', position);
-        socket.emit('geo.update', {
-            longitude: position.coords.longitude,
-            latitude: position.coords.latitude
-        });
-    }
-
-    function error(err) {
-        console.warn(err.message);
-        $.getJSON("http://freegeoip.net/json/", function(data) {
-            updateGeo({
-                coords: {
-                    latitude: data.latitude,
-                    longitude: data.longitude
-                }
-            });
-        });
-    }
-})();
-
 /* == NOTIFICATIONS == */
 const notifContainer = $('#notifications-dropdown');
 const notifTitle = $('#notifications-title');
@@ -76,22 +34,22 @@ const addNotif = (notif) => {
                 |  has visited your profile.`;
             break;
 
+        case 'FRIEND_REQUEST':
+            notifHtml =
+                `a(href="/profile/" + notif.emitter.id) #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
+                |  like you.`;
+            break;
+
         case 'FRIEND_ACCEPT':
             notifHtml =
                 `a(href="/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
-                |  accepted your friend request.`;
-            break;
-
-        case 'FRIEND_IGNORE':
-            notifHtml =
-                `a(href="/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
-                |  refused your friend request.`;
+                |  and you are now connected.`;
             break;
 
         case 'FRIEND_REMOVE':
             notifHtml =
                 `a(href="/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
-                |  removed you from his friends list.`;
+                |  no more like you.`;
     }
 
     if (notifHtml) {
@@ -129,87 +87,12 @@ socket.on('notification.received', (notif) => {
 
 notifTitle.on('click', () => {
     if (unreadNotifications.length) {
-        //$('li.nothing', notifContainer).show();
         $('.material-icons', notifTitle).html('notifications_none');
         $('.notifsCount', notifTitle).remove();
         socket.emit('notification.read', unreadNotifications);
         unreadNotifications = [];
     }
 });
-
-/* == FRIENDS == */
-const friendContainer = $('#friends-dropdown');
-const friendTitle = $('#friends-title');
-const friendTitleMobile = $('#friends-title-mobile .badge');
-let friendLen = 0;
-const addFriendsRequest = (friend) => {
-    let request =
-        `li(request_id=friend.user1.id)
-            a(href="/profile/" + friend.user1.id) #{friend.user1.profile.firstname} #{friend.user1.profile.lastname}
-            |  want to be your friend.
-            p
-                a(onclick="acceptFriend("+friend.user1.id+")").accept Accept
-                a(onclick="ignoreFriend("+friend.user1.id+")").ignore Ignore`;
-
-    friendContainer.prepend(pug.render(request, {
-        friend: friend
-    }));
-
-    if (friendLen <= 0) {
-        friendLen = 0;
-        $('li.nothing', friendContainer).hide();
-        $('.material-icons', friendTitle).html('people');
-        friendTitle.append('<span class="notifsCount">0</span>');
-    }
-    friendLen++;
-
-    // Add notif to mobile
-    if (friendLen) {
-        if (friendTitleMobile.hasClass('new') === false)
-            friendTitleMobile.addClass('new');
-        friendTitleMobile.html(friendLen)
-    }
-
-    $('.notifsCount', friendTitle).html(friendLen);
-};
-
-socket.emit('friend.getRequests');
-
-socket.on('friend.request.new', (friend) => {
-    addFriendsRequest(friend);
-});
-
-socket.on('friend.remove', (id) => {
-    removeFriendFromList(id);
-});
-
-const acceptFriend = (request_id) => {
-    removeFriendFromList(request_id);
-    if (typeof acceptFromList !== 'undefined')
-        acceptFromList(request_id);
-    socket.emit('friend.request.accept', request_id);
-};
-
-const ignoreFriend = (request_id) => {
-    removeFriendFromList(request_id);
-    if (typeof ignoreFromList !== 'undefined')
-        ignoreFromList(request_id);
-    socket.emit('friend.request.ignore', request_id);
-};
-
-function removeFriendFromList(id) {
-    $('li[request_id='+id+']').remove();
-    friendLen--;
-    if (friendLen === 0) {
-        $('li.nothing', friendContainer).show();
-        $('.material-icons', friendTitle).html('people_outline');
-        $('.notifsCount', friendTitle).remove();
-        friendTitleMobile.removeClass('new');
-        friendTitleMobile.html('')
-    } else {
-        $('.notifsCount', friendTitle).html(friendLen);
-    }
-}
 
 /* == MESSAGES == */
 const messageTitle = $('#messages-title');

@@ -7,156 +7,134 @@ module.exports.index = (req, res) => {
 };
 
 module.exports.socket = (io, client) => {
-    const friendRequest = (data) => {
-        const room = 'user.' + data.target;
+    const friendLike = (data) => {
+        if (!data.target || !data.target.id)
+            return false;
 
-        Friend.getRequest(client.user.id, data.target, (err, result) => {
+        Friend.getRequest(client.user.id, data.target.id, (err, like) => {
             if (err) {
                 console.error(err);
                 return false;
             }
 
-            if (result && result.userAction === client.user.id) { // Si true, accepte requete
-                friendRequestAccept(data.target);
-                return true;
-            } else if (result) {
+            let notifications = [];
+
+            let notif = new Notification();
+            notif.emitter = client.user;
+            notif.target = data.target;
+            notif.type = 'FRIEND_REQUEST';
+
+            notifications.push(notif);
+
+            if (!like) {
+                like = new Friend();
+                like.user1 = client.user.id;
+                like.user2 = data.target.id;
+                like.userAction = data.target.id;
+                like.status = 0;
+            } else if (like.status === 0 && like.userAction === client.user.id) {
+                like.userAction = null;
+                like.status = 1;
+
+                let notif1 = new Notification();
+                notif1.emitter = client.user;
+                notif1.target = data.target;
+                notif1.type = 'FRIEND_ACCEPT';
+                notifications.push(notif1);
+
+                let notif2 = new Notification();
+                notif2.emitter = data.target;
+                notif2.target = client.user;
+                notif2.type = 'FRIEND_ACCEPT';
+                notifications.push(notif2);
+            } else {
                 return false;
             }
 
-            let friend = new Friend();
-            friend.user1 = client.user;
-            friend.user2 = data.target;
-            friend.userAction = data.target;
-            friend.status = 0;
-            friend.save((err, result) => {
+            like.save((err, result) => {
                 if (err) {
-                    console.error(err);
+                    console.log(err);
                     return false;
                 }
 
-                if (io.sockets.adapter.rooms[room] === undefined)
-                    return false;
-                io.to(room).emit('friend.request.new', friend);
+                Notification.saveMultiples(notifications, (err) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    const room = 'user.' + data.target.id;
+                    notifications.forEach((notif) => {
+                        if (notif.target.id === client.user.id)
+                            client.emit('notification.received', notif);
+                        else
+                            io.to(room).emit('notification.received', notif);
+
+                    })
+                })
+
             });
         });
     };
-    client.on('friend.request.send', friendRequest);
+    client.on('friend.like', friendLike);
 
-    const friendGetRequests = () => {
-        Friend.getRequests(client.user.id, (err, result) => {
+    const friendUnlike = (data) => {
+        Friend.getRequest(client.user.id, data.target.id, (err, like) => {
             if (err) {
                 console.error(err);
                 return false;
             }
 
-            result.forEach((friend) => {
-                client.emit('friend.request.new', friend)
-            })
-        })
-    };
-    client.on('friend.getRequests', friendGetRequests);
-
-    const friendRequestAccept = (userId) => {
-        Friend.getRequest(userId, client.user.id, (err, friend) => {
-            if (err) {
-                console.error(err);
-                return false;
-            }
-
-            if (!friend)
+            if (!like)
                 return false;
 
-            friend.status = 1;
-            friend.save((err) => {
-                if (err) {
-                    console.error(err);
-                    return false;
-                }
-
-                // Notification
-                const room = 'user.' + userId;
-                io.to(room).emit('friend.request.accept', client.user.id);
-                let notif = new Notification();
-                notif.emitter = client.user;
-                notif.target = userId;
-                notif.type = 'FRIEND_ACCEPT';
-                notif.save((err) => {
+            if (like.status === 0 && client.user.id !== like.userAction) {
+                like.del((err) => {
                     if (err) {
                         console.error(err);
-                        return false;
+                        return false
                     }
 
-                    User.findById(userId, (err, user2) => {
+                    let notif = new Notification();
+                    notif.emitter = client.user;
+                    notif.target = data.target;
+                    notif.type = 'FRIEND_REMOVE';
+                    notif.save((err) => {
                         if (err) {
                             console.error(err);
                             return false;
                         }
 
-                        user2.getProfile((err) => {
-                            if (err) {
-                                console.error(err);
-                                return false;
-                            }
-
-                            user2.profile.popularity += 5;
-                            user2.saveProfile((err) => {
-                                if (err) {
-                                    console.error(err);
-                                    return false;
-                                }
-
-                                client.user.profile.popularity += 5;
-                                client.user.saveProfile((err) => {
-                                    if (err) {
-                                        console.error(err);
-                                        return false;
-                                    }
-                                    io.to(room).emit('notification.received', notif);
-                                });
-                            })
-                        })
+                        const room = 'user.' + data.target.id;
+                        io.to(room).emit('notification.received', notif);
                     });
-                })
-
-            })
-        });
-    };
-    client.on('friend.request.accept', friendRequestAccept);
-
-    const friendRequestIgnore = (userId) => {
-        Friend.getRequest(userId, client.user.id, (err, friend) => {
-            if (err) {
-                console.error(err);
-                return false;
-            }
-
-            if (!friend)
-                return false;
-
-            friend.delete((err) => {
-                if (err) {
-                    console.error(err);
-                    return false;
-                }
-
-                // Notification
-                const room = 'user.' + userId;
-                io.to(room).emit('friend.remove', client.user.id);
-                let notif = new Notification();
-                notif.emitter = client.user;
-                notif.target = userId;
-                notif.type = 'FRIEND_IGNORE';
-                notif.save((err) => {
+                });
+            } else {
+                like.userAction = client.user.id;
+                like.status = 0;
+                like.save((err) => {
                     if (err) {
                         console.error(err);
                         return false;
                     }
-                    io.to(room).emit('notification.received', notif);
+
+                    let notif = new Notification();
+                    notif.emitter = client.user;
+                    notif.target = data.target;
+                    notif.type = 'FRIEND_REMOVE';
+                    notif.save((err) => {
+                        if (err) {
+                            console.error(err);
+                            return false;
+                        }
+
+                        const room = 'user.' + data.target.id;
+                        io.to(room).emit('notification.received', notif);
+                    });
                 })
-            })
-        });
+            }
+        })
     };
-    client.on('friend.request.ignore', friendRequestIgnore);
+    client.on('friend.unlike', friendUnlike);
 
     const friendTest = (userId) => {
         Friend.getRequest(userId, client.user.id, (err, friend) => {
@@ -171,66 +149,44 @@ module.exports.socket = (io, client) => {
     };
     client.on('friend.test', friendTest);
 
-    const friendRemove = (userId) => {
-        Friend.getRequest(userId, client.user.id, (err, friend) => {
+    const friendBlock = (data) => {
+        Friend.getRequest(client.user.id, data.target.id, (err, like) => {
             if (err) {
                 console.error(err);
                 return false;
             }
 
-            if (!friend)
+            if (!like) {
+                like = new Friend();
+                like.user1 = client.user.id;
+                like.user2 = data.target.id;
+            }
+
+            if (like.status === 2)
                 return false;
 
-            friend.delete((err) => {
+            like.userAction = client.user.id;
+            like.status = 2;
+
+            like.save((err) => {
                 if (err) {
                     console.error(err);
                     return false;
                 }
-
-                // Notification
-                const room = 'user.' + userId;
-                io.to(room).emit('friend.remove', client.user.id);
-                if (friend.status) {
-                    let notif = new Notification();
-                    notif.emitter = client.user;
-                    notif.target = userId;
-                    notif.type = 'FRIEND_REMOVE';
-                    notif.save((err) => {
-                        if (err) {
-                            console.error(err);
-                            return false;
-                        }
-                        io.to(room).emit('notification.received', notif);
-                    });
-                }
             })
-        })
-    };
-    client.on('friend.remove', friendRemove);
-
-    const friendBlock = (userId) => {
-        let friend = new Friend;
-        friend.user1 = client.user.id;
-        friend.user2 = userId;
-        friend.userAction = client.user.id;
-        friend.status = 2;
-
-        friend.save((err) => {
-            if (err)
-                console.error(err);
-        })
+        });
     };
     client.on('friend.block', friendBlock);
 
-    const friendUnblock = (userId) => {
-        Friend.getRequest(client.user.id, userId, (err, friend) => {
+    const friendUnblock = (data) => {
+        Friend.getRequest(client.user.id, data.target.id, (err, friend) => {
             if (err) {
                 console.error(err);
                 return false;
             }
 
             if (friend.status === 2 && friend.userAction === client.user.id) {
-                friend.delete((err) => {
+                friend.del((err) => {
                     if (err) {
                         console.error(err);
                         return false;

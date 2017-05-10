@@ -18,11 +18,6 @@ block main_layout
         li.view-all
             a(href='/notifications') View all notifications
 
-    ul#friends-dropdown.dropdown-content
-        li.nothing No friend request
-        li.view-all
-            a(href='/friends') View all friends
-
     nav(role='navigation').light-blue.lighten-1
         div.nav-wrapper.container
             a(href='/')#logo-container.brand-logo Matcha
@@ -30,7 +25,6 @@ block main_layout
                 i.material-icons menu
             ul.right.hide-on-med-and-down
                 li: a(href='/messages').valign-wrapper#messages-title: i.material-icons chat_bubble_outline
-                li: a(href='#!' data-activates='friends-dropdown').dropdown-button.valign-wrapper#friends-title: i.material-icons people_outline
                 li: a(href='#!' data-activates='notifications-dropdown').dropdown-button.valign-wrapper#notifications-title: i.material-icons notifications_none
                 li
                     a(href='#!' data-activates="user-dropdown").dropdown-button.valign-wrapper#user-title
@@ -52,10 +46,6 @@ block main_layout
                     a(href='/notifications') Notifications
                         span.badge.right
                         i.material-icons notifications_none
-                li#friends-title-mobile
-                    a(href='/friends') Friends
-                        span.badge.right
-                        i.material-icons people_outline
                 li
                     a(href='/logout') Logout
                         i.material-icons power_settings_new
@@ -74,5 +64,7 @@ block main_scripts
         var user = !{JSON.stringify(user)};
     script(type='text/javascript' src='/js/logged.js')
     block scripts
+
+    script(type='text/javascript' src='/js/geo.js')
 
 

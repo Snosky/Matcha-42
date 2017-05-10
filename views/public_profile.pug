@@ -25,7 +25,7 @@ block content
                     h3 #{profileUser.profile.firstname} #{profileUser.profile.lastname}
                     div#friendButton
                         if (profileUser.id !== user.id && user.profile.images && user.profile.images.length > 0)
-                            a.btn.waves-effect.waves-light.pink#friend-request
+                            a.btn.waves-effect.waves-light.pink#like
                                 i.material-icons.left add
                                 | Like
                             a.btn.waves-effect.waves-light.red.darken-1#block

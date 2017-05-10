@@ -116,6 +116,22 @@ class Notification {
         })
     }
 
+    static saveMultiples(notifs, done) {
+        Promise.each(notifs, (notif) => {
+            return new Promise((resolve, reject) => {
+                insert(notif, (err, result) => {
+                    if (err)
+                        return reject(err);
+                    return resolve();
+                })
+            })
+        }).then(() => {
+            return done(null);
+        }).catch((err) => {
+            return done(err);
+        })
+    };
+
     /* JSON */
     toJSON() {
         let {id, emitter, target, type, time, status} = this;
@@ -135,7 +151,7 @@ class Notification {
 }
 
 const insert = (notif, done) => {
-    db.query('INSERT INTO t_notification SET usr_id_emitter=?, usr_id_target=?, notif_type=?, notif_status=0', [notif.emitter.id, notif.target, notif.type], (err, result) => {
+    db.query('INSERT INTO t_notification SET usr_id_emitter=?, usr_id_target=?, notif_type=?, notif_status=0', [notif.emitter.id || notif.emitter, notif.target.id || notif.target, notif.type], (err, result) => {
         if (err)
             return done(err);
         notif.id = result.insertId;
@@ -145,7 +161,7 @@ const insert = (notif, done) => {
 };
 
 const update = (notif, done) => {
-    db.query('UPDATE t_notification SET notif_status=1 WHERE usr_id_target=?', [notif.target], (err, result) => {
+    db.query('UPDATE t_notification SET notif_status=1 WHERE usr_id_target=?', [notif.target.id || notif.target], (err, result) => {
         if (err)
             return done(err);
         return done(null, result);

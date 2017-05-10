@@ -25,14 +25,14 @@ class Friend {
     }
 
     save(done) {
-        db.query('REPLACE INTO t_friend (usr_id_1, usr_id_2, usr_id_action, status) VALUES (?, ?, ?, ?)', [this.user1.id || this.user1, this.user2, this.userAction || this.user2, this.status || 0], (err, result) => {
+        db.query('REPLACE INTO t_friend (usr_id_1, usr_id_2, usr_id_action, status) VALUES (?, ?, ?, ?)', [this.user1, this.user2, this.userAction, this.status || 0], (err, result) => {
             if (err)
                 return done(err);
             return done(null, result);
         });
     }
 
-    delete(done) {
+    del(done) {
         db.query('DELETE FROM t_friend WHERE usr_id_1 IN (?) AND usr_id_2 IN (?)', [[this.user1.id || this.user1, this.user2], [this.user1.id || this.user1, this.user2]], (err, result) => {
             if (err)
                 return done(err);
