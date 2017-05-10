@@ -114,20 +114,6 @@ module.exports.socket = (io, client) => {
                         console.error(err);
                         return false
                     }
-
-                    let notif = new Notification();
-                    notif.emitter = client.user;
-                    notif.target = data.target;
-                    notif.type = 'FRIEND_REMOVE';
-                    notif.save((err) => {
-                        if (err) {
-                            console.error(err);
-                            return false;
-                        }
-
-                        const room = 'user.' + data.target.id;
-                        io.to(room).emit('notification.received', notif);
-                    });
                 });
             } else {
                 like.userAction = client.user.id;

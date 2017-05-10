@@ -7,6 +7,12 @@ a.btn.waves-effect.waves-light.red.darken-1#block
     i.material-icons.left block
     | Block`;
 
+const isMatch =
+`a.waves-effect.waves-teal.btn-flat It's a match
+a.btn.waves-effect.waves-light.red#unlike
+    i.material-icons.left close
+    | Unlike`;
+
 const isLike =
 `a.btn.waves-effect.waves-light.red#unlike
     i.material-icons.left close
@@ -55,7 +61,9 @@ socket.on('user.isonline', (id) => {
 socket.emit('friend.test', profileUser.id);
 socket.on('friend.isfriend', (friend) => {
     let button = undefined;
-    if (friend.status === 1 || (friend.status === 0 && friend.userAction !== user.id))
+    if (friend.status === 1)
+        button = isMatch;
+    if (friend.status === 0 && friend.userAction !== user.id)
         button = isLike;
     else if (friend.status === 2 && friend.userAction === user.id)
         button = unblockTemplate;
@@ -64,16 +72,9 @@ socket.on('friend.isfriend', (friend) => {
     $('#friendButton').html(pug.render(button));
 });
 
-socket.on('friend.remove', (id) => {
-    if (id === profileUser.id) {
-        $('#friendButton').html(pug.render(defaultTemplate));
-    }
-});
-
-socket.on('friend.request.accept', (id) => {
-    if (id === profileUser.id) {
-        $('#friendButton').html(pug.render(isFriendTemplate));
-    }
+socket.on('notification.received', (notif) => {
+    if (notif.type === 'FRIEND_ACCEPT')
+        $('#friendButton').html(pug.render(isMatch));
 });
 
 $(document).ready(function(){
