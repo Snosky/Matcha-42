@@ -1,6 +1,7 @@
 /* == TAGS == */
 let autoData = {};
 let defaultChips = [];
+
 (() => {
     if (tags)
         tags.forEach((tag) => {
@@ -28,14 +29,14 @@ let defaultChips = [];
         });
     });
 
-    /*$('.chips').on('chip.add', (e, chip) => {
+    $('.chips').on('chip.add', (e, chip) => {
         // Block add if tag do not exist
         let tag = tags.find((tag) => {
             return tag.value === chip.tag;
         });
         if (tag === undefined)
             return false;
-    });*/
+    });
 })();
 
 /* == RANGE == */
@@ -83,14 +84,26 @@ let orderDirectionInput = $('select[name=orderDirection]');
 $('#filterForm').submit((e) => {
     e.preventDefault();
 
+    let emmittags = [];
+
+    $('.chips-autocomplete').material_chip('data').forEach((chip) => {
+        let tag = tags.find((tag) => {
+            return chip.tag === tag.value;
+        });
+        if (tag)
+            emmittags.push(tag.id);
+    });
+
     socket.emit('match.search', {
         age: age.noUiSlider.get(),
         popularity: popularity.noUiSlider.get(),
         location:  localisationInput.val(),
         order: orderInput.val(),
         orderDirection: orderDirectionInput.val(),
-        tags: $('.chips').material_chip('data')
+        tags: emmittags
     });
+
+    console.log();
 
     $('#profile').html('');
 });

@@ -34,10 +34,7 @@ module.exports.index = (req, res) => {
 module.exports.socket = (io, client) => {
 
     const matchSearch = (options) => {
-        let tags = options.tags.map((tag) => {
-            return tag.id
-        });
-        tags = tags.join(', ');
+        tags = options.tags.join(', ');
 
         let reqOptions = {
             minAge: options.age[0],
