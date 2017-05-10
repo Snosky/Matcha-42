@@ -92,25 +92,19 @@ class User
         const long = mysql.escape(this.profile.geoLongitude);
 
         let req = `
-            SELECT
+            SELECT DISTINCT
                 t_user.usr_id,
+                (SELECT COUNT(*) FROM t_user_has_t_tag WHERE usr_id=t_user.usr_id AND tag_id IN (SELECT tag_id FROM t_user_has_t_tag WHERE usr_id=${mysql.escape(this.id)})) tagCount,
                 (6371 * ACOS(COS(RADIANS(profile.geoLatitude)) * COS(RADIANS(${lat})) * COS(RADIANS(${long}) - RADIANS(profile.geoLongitude)) + SIN(RADIANS(profile.geoLatitude)) * SIN(RADIANS(${lat})))) AS distance,
                 DATE_FORMAT(NOW(), '%Y') - DATE_FORMAT(profile.birthday, '%Y') age,
-                COUNT(DISTINCT t2.tag_id) tagCount,
                 MatchScore(
                     (6371 * ACOS(COS(RADIANS(profile.geoLatitude)) * COS(RADIANS(${lat})) * COS(RADIANS(${long}) - RADIANS(profile.geoLongitude)) + SIN(RADIANS(profile.geoLatitude)) * SIN(RADIANS(${lat})))),
-                    COUNT(DISTINCT t2.tag_id),
+                    (SELECT COUNT(*) FROM t_user_has_t_tag WHERE usr_id=t_user.usr_id AND tag_id IN (SELECT tag_id FROM t_user_has_t_tag WHERE usr_id=${mysql.escape(this.id)})),
                     DATE_FORMAT(profile.birthday, '%Y') - DATE_FORMAT(${mysql.escape(this.profile.birthday)}, '%Y')
                 ) AS score
             FROM t_user
             LEFT JOIN t_user_profile profile ON profile.usr_id=t_user.usr_id
-            LEFT JOIN t_user_has_t_tag t ON t.usr_id=t_user.usr_id
-            LEFT JOIN t_user_has_t_tag t2 ON t2.usr_id=t_user.usr_id`;
-
-        if (options && options.tags !== '')
-            req += ' AND t2.tag_id IN (' + options.tags + ')';
-        else if (!options)
-            req += ` AND t2.tag_id IN (SELECT tag_id FROM t_user_has_t_tag WHERE usr_id=${mysql.escape(this.id)})`;
+            LEFT JOIN t_user_has_t_tag t ON t.usr_id=t_user.usr_id`;
 
         req += ` WHERE
                 t_user.usr_id!=?
@@ -121,8 +115,8 @@ class User
 
         if (options)
             req += ' AND profile.popularity >= ' + mysql.escape(options.minPopularity) + ' AND profile.popularity <= ' + mysql.escape(options.maxPopularity);
-
-        req += ' GROUP BY t.usr_id, t2.usr_id';
+        if (options && options.tags !== '')
+            req += ` AND t.tag_id IN (${mysql.escape(options.tags)})`;
         if (options)
             req += ` HAVING 
                         age >= ${mysql.escape(options.minAge)}
@@ -167,6 +161,9 @@ class User
             matchSex = ['woman', 'man'];
 
         let data = [this.id, matchSex, matchOrientation];
+
+        //console.log(mysql.format(req, data));
+        console.log(options);
 
         db.query(req, data, (err, result) => {
             if (err)
