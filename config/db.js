@@ -1,6 +1,6 @@
 module.exports = {
-    host: 'localhost',
-    user: 'root',
-    password: '',
+    host: 'snosky.com',
+    user: 'matcha',
+    password: 'matcha_password123',
     database: 'matcha'
 };
