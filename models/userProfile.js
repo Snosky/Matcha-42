@@ -93,6 +93,14 @@ class UserProfile {
         })
     }
 
+    static getProfile(id, done) {
+        db.query('SELECT *, DATE_FORMAT(birthday, "%Y-%m-%d") AS birthday FROM t_user_profile WHERE usr_id=?', id, (err, result) => {
+            if (err)
+                return done(err);
+            return done(null, result[0] ? new UserProfile().hydrate(result[0]) : null);
+        });
+    }
+
     /* JSON */
     toJSON() {
         let {firstname, lastname, sex, orientation, birthday, images, profileImage, bio, geoTimestamp, geoLatitude, geoLongitude, popularity, lastConnection} = this.data;

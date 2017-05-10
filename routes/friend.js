@@ -1,6 +1,6 @@
 const Friend = require('../models/friend');
 const Notification = require('../models/notification');
-const User = require('../models/user');
+const UserProfile = require('../models/userProfile');
 
 module.exports.index = (req, res) => {
     res.render('friends');
@@ -57,21 +57,42 @@ module.exports.socket = (io, client) => {
                     return false;
                 }
 
-                Notification.saveMultiples(notifications, (err) => {
+                UserProfile.getProfile(data.target.id, (err, userProfile) => {
                     if (err) {
-                        console.log(err);
+                        console.error(err);
+                        return false;
                     }
 
-                    const room = 'user.' + data.target.id;
-                    notifications.forEach((notif) => {
-                        if (notif.target.id === client.user.id)
-                            client.emit('notification.received', notif);
-                        else
-                            io.to(room).emit('notification.received', notif);
+                    if (!userProfile)
+                        return false;
 
+                    if (userProfile.popularity + 3 <= 100)
+                        userProfile.popularity += 3; // 3 pts if someone like you
+                    else
+                        userProfile.popularity = 100;
+
+                    userProfile.save((err) => {
+                        if (err) {
+                            console.error(err);
+                            return false;
+                        }
+
+                        Notification.saveMultiples(notifications, (err) => {
+                            if (err) {
+                                console.log(err);
+                            }
+
+                            const room = 'user.' + data.target.id;
+                            notifications.forEach((notif) => {
+                                if (notif.target.id === client.user.id)
+                                    client.emit('notification.received', notif);
+                                else
+                                    io.to(room).emit('notification.received', notif);
+
+                            })
+                        })
                     })
-                })
-
+                });
             });
         });
     };
