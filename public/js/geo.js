@@ -20,7 +20,6 @@
     }
 
     function updateGeo(position) {
-        console.log('Update geo', position);
         socket.emit('geo.update', {
             longitude: position.coords.longitude,
             latitude: position.coords.latitude
@@ -28,7 +27,6 @@
     }
 
     function error(err) {
-        console.warn(err.message);
         $.getJSON("http://freegeoip.net/json/", function(data) {
             updateGeo({
                 coords: {

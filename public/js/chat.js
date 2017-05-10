@@ -85,6 +85,11 @@ chatMessage.keypress(function(e) {
 });
 
 const sendMessage = () => {
+    if (chatMessage.val().length > 10000) {
+        alert('Message too long. Max 10000 char.');
+        return false;
+    }
+
     let message = {
         type: 'send',
         message: chatMessage.val(),

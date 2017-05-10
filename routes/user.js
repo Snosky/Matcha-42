@@ -296,6 +296,8 @@ module.exports.profilePublicValidation = (req, res, next) => {
     req.bodyCheck('firstname', 'First name is not valid').isRequired();
     req.bodyCheck('lastname', 'Last name is not valid').isRequired();
 
+    req.bodyCheck('bio', 'Bio is too long. 10 000 characters maximum').maxLen(10000);
+
     req.isFormValid().then(
         valid => {
             if (valid === false)

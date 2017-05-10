@@ -40,6 +40,16 @@ class Validator {
         return this;
     }
 
+    maxLen(len) {
+        const func = () => {
+            return new Promise(resolve => {
+                resolve(this.value().length <= len);
+            });
+        };
+        this.addToTest(func);
+        return this;
+    }
+
     isRequired() {
         const func = () => {
             return new Promise(resolve => {

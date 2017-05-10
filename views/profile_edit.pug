@@ -75,7 +75,7 @@ block content
                         label Your location
                 div.row
                     div.input-field.col.s12
-                        textarea(name='bio')#bio.materialize-textarea= user.profile.bio
+                        textarea(name='bio', maxlength=10000)#bio.materialize-textarea= user.profile.bio
                         label(for='bio') My Bio
                 div.row
                     div.col.s12.center

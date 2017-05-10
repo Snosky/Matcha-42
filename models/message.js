@@ -66,7 +66,7 @@ class Message {
     }
 
     static countTotalUnread(target, done) {
-        db.query('SELECT COUNT(*) AS count FROM t_message WHERE usr_id_target=? AND msg_status=0', target, (err, result) => {
+        db.query('SELECT COUNT(*) AS count FROM t_message LEFT JOIN t_friend ON (t_friend.usr_id_1=? OR t_friend.usr_id_2=1) AND t_friend.status=1 WHERE usr_id_target=? AND msg_status=0 AND usr_id_emit IN (t_friend.usr_id_1, t_friend.usr_id_2)', [target, target], (err, result) => {
             if (err)
                 return done(err);
             return done(null, result[0].count);

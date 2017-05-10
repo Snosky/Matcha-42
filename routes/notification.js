@@ -87,10 +87,10 @@ module.exports.socket = (io, client) => {
                                         return false;
                                     }
 
-                                    if (userProfile.popularity + 1 <= 100)
+                                    if (user.profile.popularity + 1 <= 100)
                                         user.profile.popularity += 1;
                                     else
-                                        userProfile.popularity = 100;
+                                        user.profile.popularity = 100;
                                     user.saveProfile((err) => {
                                         if (err) {
                                             console.error(err);
