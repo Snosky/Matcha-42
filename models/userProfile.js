@@ -109,5 +109,3 @@ class UserProfile {
 }
 
 module.exports = UserProfile;
-
-//TODO : Test creer un compte et ce co direct (clean tous avant) peut etre crash

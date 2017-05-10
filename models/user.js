@@ -162,9 +162,6 @@ class User
 
         let data = [this.id, matchSex, matchOrientation];
 
-        //console.log(mysql.format(req, data));
-        console.log(options);
-
         db.query(req, data, (err, result) => {
             if (err)
                 return done(err);

@@ -11,7 +11,6 @@ block content
                 div.row.col.s12.m5.l3.center
                     div.col.s12
                         img(src='/images_upload/' + profileUser.profile.profileImage).responsive-img
-                        //div(style='background-image: url(/images_upload/' + profileUser.profile.profileImage +');').col.s12
                     div.col.s12
                         p.left-align Popularity score : #{profileUser.profile.popularity}
                         p.left-align Location :
@@ -32,7 +31,7 @@ block content
                                 i.material-icons.left block
                                 | Block
                         if (profileUser.id !== user.id && (!user.profile.images || user.profile.images.length === 0))
-                            p Upload images if you want to add friends.
+                            p Upload images if you want to send love to people.
                     h5 #{age}yo | I'm a #{profileUser.profile.sex} and I love #{orAff[profileUser.profile.orientation]}
                     if profileUser.profile.bio
                         p.bio= profileUser.profile.bio
@@ -48,7 +47,6 @@ block content
                 div.col.s12
                 each tag in profileTags
                     div.chip= tag.value
-//- TODO : Last connexion date
 
 block scripts
     script.
