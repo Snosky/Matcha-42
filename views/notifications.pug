@@ -13,14 +13,14 @@ block content
                     a(href='/profile/' + notif.emitter.id) #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
                     |  has visited your profile.
                 else if (notif.type === 'FRIEND_ACCEPT')
-                    a(href="/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
-                    |  accepted your friend request.
-                else if (notif.type === 'FRIEND_IGNORE')
-                    a(href = "/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
-                    |  refused your friend request.
+                    a(href="/profile/" + notif.emitter.id) #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
+                    |  like you.
+                else if (notif.type === 'FRIEND_REQUEST')
+                    a(href="/profile/" + notif.emitter.id) #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
+                    |  like you.
                 else if (notif.type === 'FRIEND_REMOVE')
                     a(href="/profile/#{notif.emitter.id}") #{notif.emitter.profile.firstname} #{notif.emitter.profile.lastname}
-                    |  removed you from his friends list.
+                    |  no more like you.
                 time(datetime=notif.time).date.timeago.grey-text
 
 block scripts
