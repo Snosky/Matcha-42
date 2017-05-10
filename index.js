@@ -69,3 +69,8 @@ const routes = require('./routes');
 app.use('/', routes);
 
 module.exports = app;
+
+/* TODO : Location dans profile public
+    TODO : Limiter tailler message et bio
+    TODO : Remplace systeme d'amis par un syteme de like (pas d'accpeter/refgurer)
+ */

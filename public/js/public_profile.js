@@ -2,24 +2,20 @@
 const defaultTemplate =
 `a.btn.waves-effect.waves-light.pink#friend-request
     i.material-icons.left add
-    | Send a friend request
+    | Like
 a.btn.waves-effect.waves-light.red.darken-1#block
     i.material-icons.left block
-    | Block user`;
+    | Block`;
 
 const pendingTemplate =
-`a.waves-effect.waves-teal.btn-flat Friend request pending.
-a.btn.waves-effect.waves-light.red#remove
-    i.material-icons.left close
-    | Cancel friend request`;
+    `a.btn.waves-effect.waves-light.pink#remove
+    i.material-icons.left add
+    | Unlike`;
 
 const isFriendTemplate =
-`a.btn.waves-effect.waves-light.blue
-    i.material-icons.left message
-    | Send a message
-a.btn.waves-effect.waves-light.red#remove
+`a.btn.waves-effect.waves-light.red#remove
     i.material-icons.left close
-    | Remove friend`;
+    | Unlike`;
 
 const blockTemplate =
 `a.btn.waves-effect.waves-light.red.darken-1#unblock
@@ -29,18 +25,33 @@ const blockTemplate =
 const isBlockedTemplate = '';
 
 const friendRequestTemplate =
-`a.btn.waves-effect.waves-light.green#accept
-    i.material-icons.left check
-    | Accept friend request
-a.btn.waves-effect.waves-light.red#ignore
-    i.material-icons.left close
-    | Ignore friend request`;
+`a.btn.waves-effect.waves-light.pink#friend-request
+    i.material-icons.left add
+    | Like
+a.btn.waves-effect.waves-light.red.darken-1#block
+    i.material-icons.left block
+    | Block`;
 
 
 /* END TEMPLATES */
 
 $(document).ready(function(){
     $('time.timeago').timeago();
+
+    let geocoder = new google.maps.Geocoder();
+    let location = $('span#location');
+    console.log(parseFloat(location.attr('lat')), location.attr('lat'));
+    let latlng = new google.maps.LatLng(parseFloat(location.attr('lat')), parseFloat(location.attr('lng')));
+    geocoder.geocode({'latLng': latlng}, function(result, status){
+        if (status === google.maps.GeocoderStatus.OK) {
+            if (result[1]) {
+                location.html(result[0].formatted_address);
+            }
+        } else {
+            console.warn(status);
+            location.html('Unknown');
+        }
+    });
 });
 
 $('#friendButton').on('click', '#friend-request', () => {

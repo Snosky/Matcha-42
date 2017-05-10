@@ -8,24 +8,29 @@ block content
     div.row
         div.col.s12.z-depth-1.grey.grey.lighten-4.row.form-container#profile
             div.row
-                div.col.s12.m3.center
-                    div(style='background-image: url(/images_upload/' + profileUser.profile.profileImage +');').profile-image
-                    p.left-align Popularity score : #{profileUser.profile.popularity}
-                    p.left-align Last connection :
-                        time.timeago(datetime=profileUser.profile.lastConnection)
-                div.col.s12.m9
+                div.row.col.s12.m5.l3.center
+                    div.col.s12
+                        img(src='/images_upload/' + profileUser.profile.profileImage).responsive-img
+                        //div(style='background-image: url(/images_upload/' + profileUser.profile.profileImage +');').col.s12
+                    div.col.s12
+                        p.left-align Popularity score : #{profileUser.profile.popularity}
+                        p.left-align Location :
+                            span#location(lat=profileUser.profile.geoLatitude lng=profileUser.profile.geoLongitude)
+                        p.left-align Last connection :
+                            time.timeago(datetime=profileUser.profile.lastConnection)
+                div.col.s12.m7.l9
                     - var age = new Date().getFullYear() - profileUser.profile.birthday.split('-')[0];
                     - var orAff = {bi: 'everyone', man: 'men', woman: 'women'}
                     h6.right-align: a(href='/report/' + profileUser.id) Report user
                     h3 #{profileUser.profile.firstname} #{profileUser.profile.lastname}
                     div#friendButton
-                        if (profileUser.id !== user.id && profileUser.profile.images && user.profile.images && profileUser.profile.images.length > 0 && user.profile.images.length > 0)
+                        if (profileUser.id !== user.id && user.profile.images && user.profile.images.length > 0)
                             a.btn.waves-effect.waves-light.pink#friend-request
                                 i.material-icons.left add
-                                | Send a friend request
+                                | Like
                             a.btn.waves-effect.waves-light.red.darken-1#block
                                 i.material-icons.left block
-                                | Block user
+                                | Block
                         if (profileUser.id !== user.id && (!user.profile.images || user.profile.images.length === 0))
                             p Upload images if you want to add friends.
                     h5 #{age}yo | I'm a #{profileUser.profile.sex} and I love #{orAff[profileUser.profile.orientation]}
@@ -48,4 +53,5 @@ block content
 block scripts
     script.
         var profileUser = !{JSON.stringify(profileUser)};
+    script(src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCkXdeT13TrHcpPaQxOqPZFzfCxpkr6h7k&libraries=places")
     script(type='text/javascript' src='/js/public_profile.js')
