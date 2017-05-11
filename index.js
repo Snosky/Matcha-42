@@ -67,5 +67,8 @@ userConnection.ifConnected((user, done) => {
 
 const routes = require('./routes');
 app.use('/', routes);
+app.use((req, res, next) => {
+    res.status(404).send('Sorry cant find that!');
+});
 
 module.exports = app;

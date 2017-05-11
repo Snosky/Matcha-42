@@ -105,7 +105,7 @@ const addMessageToBox = (message) => {
     let template = undefined;
     if (message.type === 'send') {
         template =
-            `div.col.s12.m6.offset-l6.right-align
+            `div.col.s12.m6.offset-m6.right-align
                 div.message.light-blue.lighten-1.white-text.z-depth-1.message-right= message`;
     } else if (message.type === 'received') {
         template =

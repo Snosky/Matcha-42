@@ -39,7 +39,7 @@ $('#friendButton')
         socket.emit('friend.unlike', {target: profileUser });
     })
     .on('click', '#block', function() { // Block user
-        $('#friendButton').html(pug.render(blockTemplate));
+        $('#friendButton').html(pug.render(unblockTemplate));
         socket.emit('friend.block', { target: profileUser });
     })
     .on('click', '#unblock', function() {
